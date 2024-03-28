@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputMappingContext.h"
-#include "PContoller.generated.h"
+#include "PController.generated.h"
 
 UCLASS()
-class APContoller : public APlayerController
+class RELIC_API APController : public APlayerController
 {
 	GENERATED_BODY()
 	

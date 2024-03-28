@@ -7,7 +7,7 @@ class APCharacter;
 class UCharacterMovementComponent;
 
 UCLASS()
-class UPAnimInstance : public UAnimInstance
+class RELIC_API UPAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 	

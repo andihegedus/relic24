@@ -5,7 +5,7 @@
 #include "Pickup.generated.h"
 
 UCLASS()
-class APickup : public AActor
+class RELIC_API APickup : public AActor
 {
 	GENERATED_BODY()
 	

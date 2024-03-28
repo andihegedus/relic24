@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Engine.h"
+#include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "PCharacter.generated.h"
 
@@ -29,11 +30,19 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 protected:
+	// FUNCTIONS
+	// -----------------------------
+	
+	void Idle();
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+
+	
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 
-	//UPROPERTY()
-	//ARelicHUD* HUD;
+	UPROPERTY()
+	ARelicHUD* HUD;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	USpringArmComponent* SpringArmComp;
