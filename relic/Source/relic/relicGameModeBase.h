@@ -10,8 +10,14 @@
  * 
  */
 UCLASS()
-class RELIC_API ArelicGameModeBase : public AGameModeBase
+class RELIC_API ARelicGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+protected:
+	// FUNCTIONS
+	// -----------------------------
+	ARelicGameModeBase(const FObjectInitializer& ObjectInitializer);
+
+	virtual void BeginPlay() override;
 };
