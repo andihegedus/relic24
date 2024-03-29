@@ -66,6 +66,12 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
 	TArray<FName> TagInFocus;
 
+	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
+	int32 InventoryQuantity;
+
+	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
+	TArray<AActor*> ItemsToDestroy;
+
 	bool bIsInteracting;
 
 protected:

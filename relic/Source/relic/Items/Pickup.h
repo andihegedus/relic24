@@ -35,9 +35,6 @@ protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	void Interact(APCharacter* PlayerCharacter);
-
-	void TakePickup(const APCharacter* Taker);
 
 	// PROPERTIES & VARIABLES
 	// -----------------------------

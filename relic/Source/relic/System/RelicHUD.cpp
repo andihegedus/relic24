@@ -2,6 +2,7 @@
 
 #include "relic/PlayerCharacter/PCharacter.h"
 #include "relic/UserInterface/Interaction/InteractionWidget.h"
+#include "relic/UserInterface/Inventory/InventoryWidget.h"
 
 ARelicHUD::ARelicHUD()
 {
@@ -13,15 +14,17 @@ void ARelicHUD::BeginPlay()
 
 	if (InteractionWidgetClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Interaction widget valid"));
 		InteractionWidget = CreateWidget<UInteractionWidget>(GetWorld(), InteractionWidgetClass);
 		InteractionWidget->AddToViewport(); 
 		InteractionWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	else
+	if (InventoryWidgetClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Interaction widget class not found."));
+		InventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), InventoryWidgetClass);
+		InventoryWidget->AddToViewport(); 
+		InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	
 
 	PlayerCharacter = Cast<APCharacter>(GetOwningPawn());
 }
@@ -32,14 +35,6 @@ void ARelicHUD::ShowMainMenu()
 
 void ARelicHUD::HideMainMenu()
 {
-}
-
-void ARelicHUD::ShowInteractionWidget()
-{
-	if (InteractionWidget)
-	{
-		InteractionWidget->SetVisibility(ESlateVisibility::Visible);
-	}
 }
 
 void ARelicHUD::HideInteractionWidget()
@@ -56,14 +51,38 @@ void ARelicHUD::UpdateInteractionWidget(const FName Tag) const
 	{
 		if (InteractionWidget->GetVisibility() == ESlateVisibility::Collapsed)
 		{
-			
+			InteractionWidget->SetVisibility(ESlateVisibility::Visible);
 		}
-		
-		InteractionWidget->SetVisibility(ESlateVisibility::Visible);
-
 		if (PlayerCharacter)
 		{
 			InteractionWidget->UpdateWidget(PlayerCharacter->TagInFocus);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("HUD: no valid player character found in world.")); 
+		}
+	}
+}
+
+void ARelicHUD::HideInventoryWidget()
+{
+	if (InventoryWidget)
+	{
+		InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void ARelicHUD::UpdateInventoryWidget(const FName Tag) const
+{
+	if (InventoryWidget)
+	{
+		if (InventoryWidget->GetVisibility() == ESlateVisibility::Collapsed)
+		{
+			InventoryWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+		if (PlayerCharacter)
+		{
+			InventoryWidget->UpdateWidget(PlayerCharacter->TagInFocus);
 		}
 		else
 		{

@@ -4,6 +4,7 @@
 #include "GameFramework/HUD.h"
 #include "RelicHUD.generated.h"
 
+class UInventoryWidget;
 class APCharacter;
 class UInteractionWidget;
 
@@ -23,9 +24,12 @@ public:
 	void ShowMainMenu();
 	void HideMainMenu();
 
-	void ShowInteractionWidget();
+	
 	void HideInteractionWidget();
 	void UpdateInteractionWidget(const FName Tag) const;
+
+	void HideInventoryWidget();
+	void UpdateInventoryWidget(const FName Tag) const;
 
 	void ShowDialogueWidget();
 	void HideDialogueWidget();
@@ -50,6 +54,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	TSubclassOf<UInteractionWidget> InteractionWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
+
 protected:
 	// PROPERTIES & VARIABLES
 	// -----------------------------
@@ -58,6 +65,9 @@ protected:
 
 	UPROPERTY()
 	UInteractionWidget* InteractionWidget;
+	
+	UPROPERTY()
+	UInventoryWidget* InventoryWidget;
 	
 	// DialogueWidget
 	// CrosshairWidget

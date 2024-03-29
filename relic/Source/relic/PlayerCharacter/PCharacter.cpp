@@ -42,6 +42,10 @@ APCharacter::APCharacter()
 	CheckInteractionDistance = 200.f;
 	CheckInteractionFrequency = 0.025;
 	MaxInteractTime = 4.f;
+
+	check(GEngine != nullptr);
+
+	
 }
 
 void APCharacter::Tick(float DeltaSeconds)
@@ -59,6 +63,9 @@ void APCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+
+	// Inventory variables
+	InventoryQuantity = 0;
 }
 
 void APCharacter::Idle()
@@ -92,7 +99,7 @@ void APCharacter::Look(const FInputActionValue& Value)
 
 void APCharacter::CheckForInteractable()
 {
-	//check(GEngine != nullptr);
+	//
 	
 	InteractionInfo.CheckLastInteractionTime = GetWorld()->GetTimeSeconds();
 	
@@ -125,6 +132,11 @@ void APCharacter::CheckForInteractable()
 		
 				FoundInteractable();
 
+				// Extra safe, make sure you can't add more than 3 medallions to inventory
+				// Relic does not add to inventory quantity
+
+				ItemsToDestroy.Add(TraceHit.GetActor());
+				
 				return;
 			}
 			if (TraceHit.GetActor()->Tags.Contains("Device"))
@@ -150,6 +162,7 @@ void APCharacter::CheckForInteractable()
 	
 	NoInteractableFound();
 	TagInFocus.Empty();
+	ItemsToDestroy.Empty();
 }
 
 void APCharacter::FoundInteractable()
@@ -163,7 +176,6 @@ void APCharacter::FoundInteractable()
 	if (TagInFocus.Contains("Pickup"))
 	{
 		HUD->UpdateInteractionWidget("Pickup");
-		UE_LOG(LogTemp, Warning, TEXT("Pickup interactable found"));
 	}
 	if (TagInFocus.Contains("Device"))
 	{
@@ -192,8 +204,9 @@ void APCharacter::StartInteract()
 	CheckForInteractable();
 	
 	bIsInteracting = true;
-	
 
+	
+	
 	/*if (TagInFocus.Contains("Device"))
 	{
 		GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, this, &APCharacter::CompleteInteract, MaxInteractTime, false);
@@ -203,6 +216,21 @@ void APCharacter::StartInteract()
 void APCharacter::CompleteInteract()
 {
 	bIsInteracting = false;
+
+	if (TagInFocus.Contains("Pickup"))
+	{
+		HUD->UpdateInventoryWidget("Pickup");
+
+		InventoryQuantity++;
+
+		FString QuantityAsString = FString::FromInt(InventoryQuantity);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, QuantityAsString);
+	}
+	
+	if (ItemsToDestroy.Num() >= 1)
+	{
+		ItemsToDestroy[0]->Destroy();
+	}
 
 	GetWorldTimerManager().ClearTimer(InteractionTimerHandle);
 }

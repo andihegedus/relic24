@@ -25,8 +25,6 @@ void UInteractionWidget::UpdateWidget(const TArray<FName> Tags)
 	{
 		if (Tags.Contains("Pickup"))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Interaction Widget should be visible now."));
-			InteractionBox->SetVisibility(ESlateVisibility::Visible);
 			KeyIcon->SetVisibility(ESlateVisibility::Visible);
 			ActionText->SetText(FText::FromString("Press"));
 			ResultText->SetText(FText::FromString("to pickup item."));

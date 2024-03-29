@@ -1,6 +1,6 @@
 ﻿#include "Pickup.h"
 
-#include "Components/SlateWrapperTypes.h"
+#include "relic/PlayerCharacter/PCharacter.h"
 
 APickup::APickup()
 {
@@ -14,27 +14,16 @@ APickup::APickup()
 	this->Tags.Add(PickupTag);
 }
 
+void APickup::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void APickup::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 }
 
-void APickup::Interact(APCharacter* PlayerCharacter)
-{
-	if (PlayerCharacter)
-	{
-		TakePickup(PlayerCharacter);
-	}
-}
 
-void APickup::TakePickup(const APCharacter* Taker)
-{
-	
-}
-
-void APickup::BeginPlay()
-{
-	Super::BeginPlay();
-}
 
 
