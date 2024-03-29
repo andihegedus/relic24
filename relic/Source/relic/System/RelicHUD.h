@@ -47,6 +47,9 @@ public:
 	bool bIsMenuVisible;
 	bool bIsWidgetVisible;
 
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UInteractionWidget> InteractionWidgetClass;
+
 protected:
 	// PROPERTIES & VARIABLES
 	// -----------------------------

@@ -60,6 +60,9 @@ protected:
 	UTextBlock* ActionText;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category="Interaction Widget | Interactable Info")
+	UTextBlock* ResultText;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category="Interaction Widget | Interactable Info")
 	UProgressBar* InteractionProgressBar;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category="Interaction Widget | Interactable Info")

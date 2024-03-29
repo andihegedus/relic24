@@ -40,6 +40,7 @@ APCharacter::APCharacter()
 	// Interaction variables
 	LineTraceStart = {FVector::ZeroVector};
 	CheckInteractionDistance = 200.f;
+	CheckInteractionFrequency = 0.025;
 	MaxInteractTime = 4.f;
 }
 
@@ -123,16 +124,28 @@ void APCharacter::CheckForInteractable()
 				TagInFocus.Add(CurrentTag);
 		
 				FoundInteractable();
+
+				return;
 			}
-			else
+			if (TraceHit.GetActor()->Tags.Contains("Device"))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Pickup not valid."));
+				CurrentTag = "Device";
+				TagInFocus.Add(CurrentTag);
+		
+				FoundInteractable();
+
+				return;
+			}
+			if (TraceHit.GetActor()->Tags.Contains("Slot"))
+			{
+				CurrentTag = "Slot";
+				TagInFocus.Add(CurrentTag);
+		
+				FoundInteractable();
+
+				return;
 			}
 		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Look direction is 0"));
 	}
 	
 	NoInteractableFound();
@@ -141,22 +154,36 @@ void APCharacter::CheckForInteractable()
 
 void APCharacter::FoundInteractable()
 {
+	// not sure if needed yet
+	if (GetWorldTimerManager().IsTimerActive(InteractionTimerHandle))
+	{
+		CompleteInteract();
+	}
+	
 	if (TagInFocus.Contains("Pickup"))
 	{
-		//HUD->UpdateInteractionWidgetComponent("Pickup");
+		HUD->UpdateInteractionWidget("Pickup");
+		UE_LOG(LogTemp, Warning, TEXT("Pickup interactable found"));
 	}
 	if (TagInFocus.Contains("Device"))
 	{
 		//HUD->UpdateInteractionWidgetComponent("Device");
+		UE_LOG(LogTemp, Warning, TEXT("Device interactable found"));
 	}
-	else
+	if (TagInFocus.Contains("Slot"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No item tags detected.")); 
+		//HUD->UpdateInteractionWidgetComponent("Slot");
+		UE_LOG(LogTemp, Warning, TEXT("Slot interactable found"));
 	}
 }
 
 void APCharacter::NoInteractableFound()
 {
+	if (GetWorldTimerManager().IsTimerActive(InteractionTimerHandle))
+	{
+		GetWorldTimerManager().ClearTimer(InteractionTimerHandle);
+	}
+
 	HUD->HideInteractionWidget();
 }
 
@@ -165,11 +192,12 @@ void APCharacter::StartInteract()
 	CheckForInteractable();
 	
 	bIsInteracting = true;
+	
 
-	if (TagInFocus.Contains("Device"))
+	/*if (TagInFocus.Contains("Device"))
 	{
 		GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, this, &APCharacter::CompleteInteract, MaxInteractTime, false);
-	}
+	}*/
 }
 
 void APCharacter::CompleteInteract()
