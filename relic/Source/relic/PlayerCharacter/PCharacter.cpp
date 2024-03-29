@@ -4,6 +4,7 @@
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/SlateWrapperTypes.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -42,10 +43,6 @@ APCharacter::APCharacter()
 	CheckInteractionDistance = 200.f;
 	CheckInteractionFrequency = 0.025;
 	MaxInteractTime = 4.f;
-
-	check(GEngine != nullptr);
-
-	
 }
 
 void APCharacter::Tick(float DeltaSeconds)
@@ -132,9 +129,6 @@ void APCharacter::CheckForInteractable()
 		
 				FoundInteractable();
 
-				// Extra safe, make sure you can't add more than 3 medallions to inventory
-				// Relic does not add to inventory quantity
-
 				ItemsToDestroy.Add(TraceHit.GetActor());
 				
 				return;
@@ -155,6 +149,8 @@ void APCharacter::CheckForInteractable()
 		
 				FoundInteractable();
 
+				ItemsToAppear.Add(TraceHit.GetActor());
+
 				return;
 			}
 		}
@@ -163,6 +159,7 @@ void APCharacter::CheckForInteractable()
 	NoInteractableFound();
 	TagInFocus.Empty();
 	ItemsToDestroy.Empty();
+	ItemsToAppear.Empty();
 }
 
 void APCharacter::FoundInteractable()
@@ -184,8 +181,7 @@ void APCharacter::FoundInteractable()
 	}
 	if (TagInFocus.Contains("Slot"))
 	{
-		//HUD->UpdateInteractionWidgetComponent("Slot");
-		UE_LOG(LogTemp, Warning, TEXT("Slot interactable found"));
+		HUD->UpdateInteractionWidget("Slot");
 	}
 }
 
@@ -223,8 +219,14 @@ void APCharacter::CompleteInteract()
 
 		InventoryQuantity++;
 
-		FString QuantityAsString = FString::FromInt(InventoryQuantity);
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, QuantityAsString);
+		//FString QuantityAsString = FString::FromInt(InventoryQuantity);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, QuantityAsString);
+	}
+	if (TagInFocus.Contains("Slot"))
+	{
+		ItemsToAppear[0]->SetActorHiddenInGame(false);
+		InventoryQuantity--;
+		HUD->UpdateInventoryWidget("Pickup");
 	}
 	
 	if (ItemsToDestroy.Num() >= 1)

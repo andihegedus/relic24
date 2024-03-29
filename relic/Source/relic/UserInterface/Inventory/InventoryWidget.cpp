@@ -49,8 +49,35 @@ void UInventoryWidget::UpdateWidget(const TArray<FName> Tags)
 				UE_LOG(LogTemp, Warning, TEXT("Player character not valid."));
 			}
 			
-			
-			
 		}
+		if (Tags.Contains("Slot"))
+        {
+            
+            if (PlayerCharacter)
+            {
+                if (PlayerCharacter->InventoryQuantity <= 0)
+                {
+                    ItemIcon->SetVisibility(ESlateVisibility::Collapsed);
+                }
+                FString QuantityAsString = FString::FromInt(PlayerCharacter->InventoryQuantity + 1);
+                QuantityText->SetText(FText::FromString(QuantityAsString));
+                
+                QuantityText->SetVisibility(ESlateVisibility::Visible);
+                
+                if (PlayerCharacter->InventoryQuantity <= 1)
+                {
+                    QuantityText->SetVisibility(ESlateVisibility::Collapsed);
+                }
+                else
+                {
+                    QuantityText->SetVisibility(ESlateVisibility::Visible);
+                }
+            }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Player character not valid."));
+            }
+            
+        }
 	}
 }

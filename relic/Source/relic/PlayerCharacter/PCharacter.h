@@ -72,6 +72,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
 	TArray<AActor*> ItemsToDestroy;
 
+	UPROPERTY(VisibleAnywhere, Category="Puzzle | Solutions")
+	TArray<AActor*> ItemsToAppear;
+
 	bool bIsInteracting;
 
 protected:

@@ -34,13 +34,15 @@ void UInteractionWidget::UpdateWidget(const TArray<FName> Tags)
 		{
 			KeyIcon->SetVisibility(ESlateVisibility::Visible);
 			ActionText->SetText(FText::FromString("Hold"));
+			ResultText->SetText(FText::FromString("to turn dial."));
 			InteractionProgressBar->SetVisibility(ESlateVisibility::Visible);
 		}
 		if (Tags.Contains("Slot"))
 		{
 			KeyIcon->SetVisibility(ESlateVisibility::Visible);
 			ActionText->SetText(FText::FromString("Press"));
-			InteractionProgressBar->SetVisibility(ESlateVisibility::Visible);
+			ResultText->SetText(FText::FromString("to place medallion."));
+			InteractionProgressBar->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 	else
