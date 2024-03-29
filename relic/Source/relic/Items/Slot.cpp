@@ -3,8 +3,6 @@
 
 ASlot::ASlot()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	
 	SlotMeshComp = CreateDefaultSubobject<UStaticMeshComponent>("InstancedMesh");
 	SetRootComponent(SlotMeshComp);
 
@@ -18,9 +16,4 @@ void ASlot::BeginPlay()
 	Super::BeginPlay();
 
 	SetActorHiddenInGame(true);
-}
-
-void ASlot::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
 }

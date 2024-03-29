@@ -77,6 +77,8 @@ public:
 
 	bool bIsInteracting;
 
+	
+
 protected:
 	// FUNCTIONS
 	// -----------------------------
@@ -108,9 +110,10 @@ protected:
 
 	FVector LineTraceStart;
 
+	float MaxInteractTime;
 	FInteractionInfo InteractionInfo;
 	FTimerHandle InteractionTimerHandle;
 	float CheckInteractionDistance;
 	float CheckInteractionFrequency;
-	float MaxInteractTime;
+	
 };

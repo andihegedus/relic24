@@ -2,12 +2,11 @@
 
 #include "Components/HorizontalBox.h"
 #include "Components/ProgressBar.h"
+#include "relic/PlayerCharacter/PCharacter.h"
 
 void UInteractionWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
-	InteractionProgressBar->PercentDelegate.BindUFunction(this, "UpdateInteractionProgress");
 }
 
 void UInteractionWidget::NativeConstruct()
@@ -16,7 +15,7 @@ void UInteractionWidget::NativeConstruct()
 
 	ActionText->SetText(FText::FromString("Press"));
 	ResultText->SetText(FText::FromString("to take item."));
-	InteractionDuration = 0.0f;
+	InteractionProgressBar->SetPercent(0.f);
 }
 
 void UInteractionWidget::UpdateWidget(const TArray<FName> Tags)
@@ -49,9 +48,4 @@ void UInteractionWidget::UpdateWidget(const TArray<FName> Tags)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UInteractionWidget: No Component Tags detected. Can't update widget.")); 
 	}
-}
-
-float UInteractionWidget::UpdateInteractionProgress()
-{
-	return 0.0f;
 }

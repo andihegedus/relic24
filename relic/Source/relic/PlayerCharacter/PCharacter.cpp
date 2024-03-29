@@ -4,6 +4,7 @@
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/ProgressBar.h"
 #include "Components/SlateWrapperTypes.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -12,6 +13,7 @@
 #include "relic/Items/Pickup.h"
 #include "relic/System/RelicHUD.h"
 #include "relic/PlayerCharacter/PController.h"
+#include "relic/UserInterface/Interaction/InteractionWidget.h"
 
 APCharacter::APCharacter()
 {
@@ -42,17 +44,7 @@ APCharacter::APCharacter()
 	LineTraceStart = {FVector::ZeroVector};
 	CheckInteractionDistance = 200.f;
 	CheckInteractionFrequency = 0.025;
-	MaxInteractTime = 4.f;
-}
-
-void APCharacter::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	if (GetWorld()->TimeSince(InteractionInfo.CheckLastInteractionTime) > CheckInteractionFrequency)
-	{
-		CheckForInteractable();
-	}
+	MaxInteractTime = 300.f;
 }
 
 void APCharacter::BeginPlay()
@@ -63,6 +55,20 @@ void APCharacter::BeginPlay()
 
 	// Inventory variables
 	InventoryQuantity = 0;
+}
+
+void APCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (GetWorld()->TimeSince(InteractionInfo.CheckLastInteractionTime) > CheckInteractionFrequency)
+	{
+		CheckForInteractable();
+	}
+
+	HUD->InteractionWidget->InteractionProgressBar->SetPercent(HUD->InteractionWidget->InteractionProgressBar->GetPercent() + GetWorld()->GetTimerManager().GetTimerRemaining(InteractionTimerHandle));
+
+	
 }
 
 void APCharacter::Idle()
@@ -164,20 +170,13 @@ void APCharacter::CheckForInteractable()
 
 void APCharacter::FoundInteractable()
 {
-	// not sure if needed yet
-	if (GetWorldTimerManager().IsTimerActive(InteractionTimerHandle))
-	{
-		CompleteInteract();
-	}
-	
 	if (TagInFocus.Contains("Pickup"))
 	{
 		HUD->UpdateInteractionWidget("Pickup");
 	}
 	if (TagInFocus.Contains("Device"))
 	{
-		//HUD->UpdateInteractionWidgetComponent("Device");
-		UE_LOG(LogTemp, Warning, TEXT("Device interactable found"));
+		HUD->UpdateInteractionWidget("Device");
 	}
 	if (TagInFocus.Contains("Slot"))
 	{
@@ -201,17 +200,19 @@ void APCharacter::StartInteract()
 	
 	bIsInteracting = true;
 
-	
-	
-	/*if (TagInFocus.Contains("Device"))
+	if (TagInFocus.Contains("Device"))
 	{
 		GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, this, &APCharacter::CompleteInteract, MaxInteractTime, false);
-	}*/
+		
+		
+	}
 }
 
 void APCharacter::CompleteInteract()
 {
 	bIsInteracting = false;
+
+	HUD->InteractionWidget->InteractionProgressBar->SetPercent(0.f);
 
 	if (TagInFocus.Contains("Pickup"))
 	{

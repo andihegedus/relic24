@@ -57,14 +57,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 
+	UPROPERTY()
+	UInteractionWidget* InteractionWidget;
+
 protected:
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 
 	// MainMenuWidget
 
-	UPROPERTY()
-	UInteractionWidget* InteractionWidget;
+	
 	
 	UPROPERTY()
 	UInventoryWidget* InventoryWidget;

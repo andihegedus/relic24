@@ -33,6 +33,9 @@ public:
 	UPROPERTY()
 	APCharacter* PlayerCharacter;
 
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category="Interaction Widget | Interactable Info")
+	UProgressBar* InteractionProgressBar;
+
 
 protected:
 	// FUNCTIONS
@@ -41,9 +44,6 @@ protected:
 	virtual void NativeOnInitialized() override;
 
 	virtual void NativeConstruct() override;
-
-	UFUNCTION(Category="Interaction Widget | Interactable Info")
-	float UpdateInteractionProgress();
 	
 
 	// PROPERTIES & VARIABLES
@@ -62,8 +62,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category="Interaction Widget | Interactable Info")
 	UTextBlock* ResultText;
 
-	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category="Interaction Widget | Interactable Info")
-	UProgressBar* InteractionProgressBar;
+	
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category="Interaction Widget | Interactable Info")
 	float InteractionDuration;
