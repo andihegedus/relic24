@@ -12,6 +12,33 @@ class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
 
+USTRUCT()
+struct FInteractionInfo
+{
+	GENERATED_BODY()
+
+	// FUNCTIONS
+	// -----------------------------
+
+	FInteractionInfo() : InteractableItem(nullptr),InteractableComponent(nullptr), CheckLastInteractionTime(0.0f)
+	{
+	};
+
+	// PROPERTIES & VARIABLES
+	// -----------------------------
+
+	UPROPERTY()
+	AActor* InteractableItem;
+
+	UPROPERTY()
+	UPrimitiveComponent* InteractableComponent;
+
+	// If over the elapsed in-game time, shoot another line trace for interactable objects
+	// Not necessary to shoot trace every single frame
+	UPROPERTY()
+	float CheckLastInteractionTime;
+};
+
 UCLASS()
 class RELIC_API APCharacter: public ACharacter
 {
@@ -29,13 +56,33 @@ public:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
+
+	// PROPERTIES & VARIABLES
+	// -----------------------------
+	
+	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
+	FName CurrentTag;
+
+	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
+	TArray<FName> TagInFocus;
+
+	bool bIsInteracting;
+
 protected:
 	// FUNCTIONS
 	// -----------------------------
-	
+
+	// Move
 	void Idle();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+
+	// Interact
+	void CheckForInteractable();
+	void FoundInteractable();
+	void NoInteractableFound();
+	void StartInteract();
+	void CompleteInteract();
 
 	
 	// PROPERTIES & VARIABLES
@@ -49,4 +96,12 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	UCameraComponent* CameraComp;
+
+	FVector LineTraceStart;
+
+	FInteractionInfo InteractionInfo;
+	FTimerHandle InteractionTimerHandle;
+	float CheckInteractionDistance;
+	float CheckInteractionFrequency;
+	float MaxInteractTime;
 };

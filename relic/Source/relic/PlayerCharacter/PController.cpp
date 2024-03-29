@@ -40,4 +40,9 @@ void APController::SetupInputComponent()
 	LookAction->ValueType = EInputActionValueType::Axis3D;
 	SetupKeyMap(PCMappingContext, LookAction, EKeys::MouseY, false, false, EInputAxisSwizzle::YXZ);
 	SetupKeyMap(PCMappingContext, LookAction, EKeys::MouseX, false, true, EInputAxisSwizzle::YXZ);
+
+	// To interact
+	InteractAction = NewObject<UInputAction>(this);
+	InteractAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, InteractAction, EKeys::E, false, false, EInputAxisSwizzle::YXZ);
 }

@@ -4,6 +4,9 @@
 #include "GameFramework/HUD.h"
 #include "RelicHUD.generated.h"
 
+class APCharacter;
+class UInteractionWidget;
+
 UCLASS()
 class RELIC_API ARelicHUD : public AHUD
 {
@@ -22,6 +25,7 @@ public:
 
 	void ShowInteractionWidget();
 	void HideInteractionWidget();
+	void UpdateInteractionWidget(const FName Tag) const;
 
 	void ShowDialogueWidget();
 	void HideDialogueWidget();
@@ -37,6 +41,9 @@ public:
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 
+	UPROPERTY()
+	APCharacter* PlayerCharacter;
+
 	bool bIsMenuVisible;
 	bool bIsWidgetVisible;
 
@@ -45,7 +52,10 @@ protected:
 	// -----------------------------
 
 	// MainMenuWidget
-	// InteractionWidget
+
+	UPROPERTY()
+	UInteractionWidget* InteractionWidget;
+	
 	// DialogueWidget
 	// CrosshairWidget
 	// DebugWidget
