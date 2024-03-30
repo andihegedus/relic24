@@ -4,13 +4,16 @@
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/BoxComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/SlateWrapperTypes.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "relic/Items/Pickup.h"
+#include "relic/Items/Doors/TombCeilingDoor.h"
 #include "relic/System/RelicHUD.h"
 #include "relic/PlayerCharacter/PController.h"
 #include "relic/UserInterface/Interaction/InteractionWidget.h"
@@ -45,6 +48,9 @@ APCharacter::APCharacter()
 	CheckInteractionDistance = 200.f;
 	CheckInteractionFrequency = 0.025;
 	MaxInteractTime = 300.f;
+
+	PlayerTag = "Player";
+	this->Tags.Add(PlayerTag);
 }
 
 void APCharacter::BeginPlay()
@@ -55,6 +61,8 @@ void APCharacter::BeginPlay()
 
 	// Inventory variables
 	InventoryQuantity = 0;
+
+	
 }
 
 void APCharacter::Tick(float DeltaSeconds)
@@ -66,9 +74,7 @@ void APCharacter::Tick(float DeltaSeconds)
 		CheckForInteractable();
 	}
 
-	HUD->InteractionWidget->InteractionProgressBar->SetPercent(HUD->InteractionWidget->InteractionProgressBar->GetPercent() + GetWorld()->GetTimerManager().GetTimerRemaining(InteractionTimerHandle));
-
-	
+	//HUD->InteractionWidget->InteractionProgressBar->SetPercent(HUD->InteractionWidget->InteractionProgressBar->GetPercent() + GetWorld()->GetTimerManager().GetTimerRemaining(InteractionTimerHandle));
 }
 
 void APCharacter::Idle()
@@ -203,8 +209,10 @@ void APCharacter::StartInteract()
 	if (TagInFocus.Contains("Device"))
 	{
 		GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, this, &APCharacter::CompleteInteract, MaxInteractTime, false);
-		
-		
+	}
+	if (TagInFocus.Contains("Slot"))
+	{
+		OnMedallionPlaced.Broadcast();
 	}
 }
 
@@ -226,7 +234,14 @@ void APCharacter::CompleteInteract()
 	if (TagInFocus.Contains("Slot"))
 	{
 		ItemsToAppear[0]->SetActorHiddenInGame(false);
-		InventoryQuantity--;
+		
+		ItemsToAppear[0]->Tags.Empty();
+		
+		if (InventoryQuantity >= 1)
+		{
+			InventoryQuantity--;
+		}
+		
 		HUD->UpdateInventoryWidget("Pickup");
 	}
 	

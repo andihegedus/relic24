@@ -4,13 +4,17 @@
 #include "Engine/Engine.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
+#include "relic/Items/Doors/TombCeilingDoor.h"
 #include "PCharacter.generated.h"
 
+class ATombCeilingDoor;
 class ARelicHUD;
 class UInputMappingContext;
 class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
+
+DECLARE_MULTICAST_DELEGATE(FOnMedallionPlaced);
 
 USTRUCT()
 struct FInteractionInfo
@@ -59,6 +63,8 @@ public:
 
 	// PROPERTIES & VARIABLES
 	// -----------------------------
+
+	FName PlayerTag;
 	
 	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
 	FName CurrentTag;
@@ -77,7 +83,7 @@ public:
 
 	bool bIsInteracting;
 
-	
+	FOnMedallionPlaced OnMedallionPlaced;
 
 protected:
 	// FUNCTIONS
