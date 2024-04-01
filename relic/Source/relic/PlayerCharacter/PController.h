@@ -36,7 +36,13 @@ public:
 	class UInputAction* RunAction;
 
 	UPROPERTY()
+	class UInputAction* DiveAction;
+
+	UPROPERTY()
 	class UInputAction* InteractAction;
+
+	UPROPERTY()
+	class UInputAction* DeviceAction;
 
 	UPROPERTY()
 	class UInputAction* AimAction;

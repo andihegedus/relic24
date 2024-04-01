@@ -3,6 +3,7 @@
 #include "relic/PlayerCharacter/PCharacter.h"
 #include "relic/UserInterface/Interaction/InteractionWidget.h"
 #include "relic/UserInterface/Inventory/InventoryWidget.h"
+#include "relic/UserInterface/PlayerState/OxygenMeterWidget.h"
 
 ARelicHUD::ARelicHUD()
 {
@@ -24,8 +25,13 @@ void ARelicHUD::BeginPlay()
 		InventoryWidget->AddToViewport(); 
 		InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	if (OxygenMeterWidgetClass)
+	{
+		OxygenMeterWidget = CreateWidget<UOxygenMeterWidget>(GetWorld(), OxygenMeterWidgetClass);
+		OxygenMeterWidget->AddToViewport();
+		OxygenMeterWidget->SetVisibility(ESlateVisibility::Visible);
+	}
 	
-
 	PlayerCharacter = Cast<APCharacter>(GetOwningPawn());
 }
 
@@ -97,6 +103,22 @@ void ARelicHUD::ShowDialogueWidget()
 
 void ARelicHUD::HideDialogueWidget()
 {
+}
+
+void ARelicHUD::ShowOxygenMeterWidget()
+{
+	if (OxygenMeterWidget)
+	{
+		OxygenMeterWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void ARelicHUD::HideOxygenMeterWidget()
+{
+	if (OxygenMeterWidget)
+	{
+		OxygenMeterWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 void ARelicHUD::ShowDebugWidget()

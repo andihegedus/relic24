@@ -35,7 +35,7 @@ void APController::SetupInputComponent()
 	SetupKeyMap(PCMappingContext, MoveAction, EKeys::A, true, true, EInputAxisSwizzle::YXZ);
 	SetupKeyMap(PCMappingContext, MoveAction, EKeys::D, false, true, EInputAxisSwizzle::YXZ);
 
-	// To look
+	// To look 
 	LookAction = NewObject<UInputAction>(this);
 	LookAction->ValueType = EInputActionValueType::Axis3D;
 	SetupKeyMap(PCMappingContext, LookAction, EKeys::MouseY, false, false, EInputAxisSwizzle::YXZ);
@@ -45,4 +45,14 @@ void APController::SetupInputComponent()
 	InteractAction = NewObject<UInputAction>(this);
 	InteractAction->ValueType = EInputActionValueType::Axis3D;
 	SetupKeyMap(PCMappingContext, InteractAction, EKeys::E, false, false, EInputAxisSwizzle::YXZ);
+
+	// To activate device
+	DeviceAction = NewObject<UInputAction>(this);
+	DeviceAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, DeviceAction, EKeys::G, false, false, EInputAxisSwizzle::YXZ);
+
+	// To dive 
+	DiveAction = NewObject<UInputAction>(this);
+	DiveAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, DiveAction, EKeys::Q, false, false, EInputAxisSwizzle::YXZ);
 }

@@ -4,6 +4,7 @@
 #include "GameFramework/HUD.h"
 #include "RelicHUD.generated.h"
 
+class UOxygenMeterWidget;
 class UInventoryWidget;
 class APCharacter;
 class UInteractionWidget;
@@ -23,7 +24,6 @@ public:
 
 	void ShowMainMenu();
 	void HideMainMenu();
-
 	
 	void HideInteractionWidget();
 	void UpdateInteractionWidget(const FName Tag) const;
@@ -33,6 +33,9 @@ public:
 
 	void ShowDialogueWidget();
 	void HideDialogueWidget();
+
+	void ShowOxygenMeterWidget();
+	void HideOxygenMeterWidget();
 
 	// Might not need these, placeholder for now:
 	//void ShowCrosshair();
@@ -57,16 +60,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UOxygenMeterWidget> OxygenMeterWidgetClass;
+
+	// Need to be public so they can be accessed by our PCharacter class
 	UPROPERTY()
 	UInteractionWidget* InteractionWidget;
+
+	UPROPERTY()
+	UOxygenMeterWidget* OxygenMeterWidget;
 
 protected:
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 
 	// MainMenuWidget
-
-	
 	
 	UPROPERTY()
 	UInventoryWidget* InventoryWidget;

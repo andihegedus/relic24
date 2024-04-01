@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Doors/TombCeilingDoor.h"
 #include "GameFramework/Pawn.h"
 #include "Slot.generated.h"
 

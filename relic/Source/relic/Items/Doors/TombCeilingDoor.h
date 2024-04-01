@@ -7,7 +7,6 @@
 class APCharacter;
 class UBoxComponent;
 class UTimelineComponent;
-class UActorComponent;
 class UStaticMeshComponent;
 class UCurveFloat;
 
@@ -22,6 +21,9 @@ public:
 	ATombCeilingDoor();
 
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void OnPuzzleSolved();
 	
 
 	// PROPERTIES & VARIABLES
@@ -34,24 +36,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* DoorSolutionTrigger;
 
-	UPROPERTY(BlueprintReadWRite, EditAnywhere)
-	TSubclassOf<APCharacter> PlayerCharacter;
-
 	UPROPERTY()
-	APCharacter* Player;
+	APCharacter* PlayerCharacter;
 
 protected:
 	// FUNCTIONS
 	// -----------------------------
 	UFUNCTION()
 	void UpdateTimelineComp(float Output);
-
-	/*UFUNCTION()
-	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* Actor,
-		class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);*/
-	
-	UFUNCTION()
-	void OnPuzzleSolved();
 
 	// PROPERTIES & VARIABLES
 	// -----------------------------

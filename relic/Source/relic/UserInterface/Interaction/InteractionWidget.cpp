@@ -32,7 +32,7 @@ void UInteractionWidget::UpdateWidget(const TArray<FName> Tags)
 		if (Tags.Contains("Device"))
 		{
 			KeyIcon->SetVisibility(ESlateVisibility::Visible);
-			ActionText->SetText(FText::FromString("Hold"));
+			ActionText->SetText(FText::FromString("Press"));
 			ResultText->SetText(FText::FromString("to turn dial."));
 			InteractionProgressBar->SetVisibility(ESlateVisibility::Visible);
 		}

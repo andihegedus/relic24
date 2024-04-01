@@ -17,6 +17,7 @@
 #include "relic/System/RelicHUD.h"
 #include "relic/PlayerCharacter/PController.h"
 #include "relic/UserInterface/Interaction/InteractionWidget.h"
+#include "relic/UserInterface/PlayerState/OxygenMeterWidget.h"
 
 APCharacter::APCharacter()
 {
@@ -47,8 +48,16 @@ APCharacter::APCharacter()
 	LineTraceStart = {FVector::ZeroVector};
 	CheckInteractionDistance = 200.f;
 	CheckInteractionFrequency = 0.025;
-	MaxInteractTime = 300.f;
+	MaxInteractTime = 120.f;
 
+	// Timer to start after puzzles are solved
+	DelayAfterSolution = 60.f;
+
+	
+	DiveTimerLoopCount = 0;
+	DeviceTimerLoopCount = 0;
+
+	// Might not be necessary
 	PlayerTag = "Player";
 	this->Tags.Add(PlayerTag);
 }
@@ -61,8 +70,7 @@ void APCharacter::BeginPlay()
 
 	// Inventory variables
 	InventoryQuantity = 0;
-
-	
+	bIsDiving = false;
 }
 
 void APCharacter::Tick(float DeltaSeconds)
@@ -74,7 +82,10 @@ void APCharacter::Tick(float DeltaSeconds)
 		CheckForInteractable();
 	}
 
-	//HUD->InteractionWidget->InteractionProgressBar->SetPercent(HUD->InteractionWidget->InteractionProgressBar->GetPercent() + GetWorld()->GetTimerManager().GetTimerRemaining(InteractionTimerHandle));
+	if (bIsDiving)
+	{
+		HUD->OxygenMeterWidget->UpdateWidget(OxygenTimerHandle, 102 - DiveTimerLoopCount);
+	}
 }
 
 void APCharacter::Idle()
@@ -106,6 +117,25 @@ void APCharacter::Look(const FInputActionValue& Value)
 	SpringArmComp->SetRelativeRotation(Input);
 }
 
+void APCharacter::Dive(const FInputActionValue& Value)
+{
+	bIsDiving = true;
+	
+	GetWorld()->GetTimerManager().SetTimer(OxygenTimerHandle, this, &APCharacter::DiveTimer, 1.f, true);
+
+	DiveTimer();
+}
+
+void APCharacter::DiveTimer()
+{
+	DiveTimerLoopCount++;
+
+	if (DiveTimerLoopCount >= 100)
+	{
+		Death();
+	}
+}
+
 void APCharacter::CheckForInteractable()
 {
 	//
@@ -120,7 +150,7 @@ void APCharacter::CheckForInteractable()
 	if (LookDirection > 0)
 	{
 		// Visualize our trace hit line
-		DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd, FColor::Magenta, false, 1.0f, 0, 2.f);
+		//DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd, FColor::Magenta, false, 1.0f, 0, 2.f);
 
 		// Contains useful things for line tracing
 		FCollisionQueryParams QueryParams;
@@ -151,6 +181,8 @@ void APCharacter::CheckForInteractable()
 				TagInFocus.Add(CurrentTag);
 		
 				FoundInteractable();
+				
+				ItemsToDestroy.Add(TraceHit.GetActor());
 
 				return;
 			}
@@ -192,11 +224,6 @@ void APCharacter::FoundInteractable()
 
 void APCharacter::NoInteractableFound()
 {
-	if (GetWorldTimerManager().IsTimerActive(InteractionTimerHandle))
-	{
-		GetWorldTimerManager().ClearTimer(InteractionTimerHandle);
-	}
-
 	HUD->HideInteractionWidget();
 }
 
@@ -208,7 +235,11 @@ void APCharacter::StartInteract()
 
 	if (TagInFocus.Contains("Device"))
 	{
-		GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, this, &APCharacter::CompleteInteract, MaxInteractTime, false);
+		OnDeviceActivated.Broadcast();
+		
+		GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, this, &APCharacter::DeviceTimer, 1.f, true);
+
+		DeviceTimer();
 	}
 	if (TagInFocus.Contains("Slot"))
 	{
@@ -216,20 +247,34 @@ void APCharacter::StartInteract()
 	}
 }
 
+
+void APCharacter::DeviceTimer()
+{
+	DeviceTimerLoopCount++;
+
+	if (DeviceTimerLoopCount >= 4)
+	{
+		GetWorldTimerManager().ClearTimer(InteractionTimerHandle);
+		bIsInteracting = false;
+		ItemsToDestroy[0]->Destroy();
+	}
+}
+
+void APCharacter::DeviceAbandoned()
+{
+	bIsInteracting = false;
+	
+}
+
 void APCharacter::CompleteInteract()
 {
 	bIsInteracting = false;
-
-	HUD->InteractionWidget->InteractionProgressBar->SetPercent(0.f);
-
+	
 	if (TagInFocus.Contains("Pickup"))
 	{
 		HUD->UpdateInventoryWidget("Pickup");
 
 		InventoryQuantity++;
-
-		//FString QuantityAsString = FString::FromInt(InventoryQuantity);
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, QuantityAsString);
 	}
 	if (TagInFocus.Contains("Slot"))
 	{
@@ -242,15 +287,22 @@ void APCharacter::CompleteInteract()
 			InventoryQuantity--;
 		}
 		
-		HUD->UpdateInventoryWidget("Pickup");
+		HUD->UpdateInventoryWidget("Slot");
 	}
-	
-	if (ItemsToDestroy.Num() >= 1)
+	if (TagInFocus.Contains("Device"))
 	{
-		ItemsToDestroy[0]->Destroy();
+		OnDeviceAbandoned.Broadcast();
 	}
+}
 
-	GetWorldTimerManager().ClearTimer(InteractionTimerHandle);
+
+void APCharacter::Death()
+{
+	check(GEngine != nullptr);
+	
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("MORTIS"));
+
+	bIsDiving = false;
 }
 
 void APCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -266,9 +318,13 @@ void APCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	EnhancedInputComponent->BindAction(PlayerBaseController->MoveAction, ETriggerEvent::Completed, this, &APCharacter::Idle);
 	
 	EnhancedInputComponent->BindAction(PlayerBaseController->LookAction, ETriggerEvent::Triggered, this, &APCharacter::Look);
-
+	
 	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Triggered, this, &APCharacter::StartInteract);
 	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Completed, this, &APCharacter::CompleteInteract);
+
+	//EnhancedInputComponent->BindAction(PlayerBaseController->DeviceAction, ETriggerEvent::Triggered, this, &APCharacter::StartInteract);
+	
+	EnhancedInputComponent->BindAction(PlayerBaseController->DiveAction, ETriggerEvent::Completed, this, &APCharacter::Dive);
 
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
 
