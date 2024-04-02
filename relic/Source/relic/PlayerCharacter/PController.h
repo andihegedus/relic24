@@ -23,7 +23,7 @@ public:
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UInputMappingContext* PCMappingContext;
 
 	UPROPERTY()

@@ -7,6 +7,7 @@
 #include "relic/Items/Doors/TombCeilingDoor.h"
 #include "PCharacter.generated.h"
 
+class ADevice;
 class ATombCeilingDoor;
 class ARelicHUD;
 class UInputMappingContext;
@@ -62,6 +63,7 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	
 
 
 	// PROPERTIES & VARIABLES
@@ -104,6 +106,12 @@ public:
 	
 	UPROPERTY()
 	ATombCeilingDoor* TombCeilingDoor;
+
+	UPROPERTY()
+	ADevice* Device;
+
+	UPROPERTY()
+	APawn* DeviceRef;
 
 protected:
 	// FUNCTIONS

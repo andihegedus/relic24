@@ -12,6 +12,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "relic/Items/Device.h"
 #include "relic/Items/Pickup.h"
 #include "relic/Items/Doors/TombCeilingDoor.h"
 #include "relic/System/RelicHUD.h"
@@ -175,7 +176,7 @@ void APCharacter::CheckForInteractable()
 				
 				return;
 			}
-			if (TraceHit.GetActor()->Tags.Contains("Device"))
+			if (TraceHit.GetActor()->Tags.Contains("Device")) 
 			{
 				CurrentTag = "Device";
 				TagInFocus.Add(CurrentTag);
@@ -186,7 +187,7 @@ void APCharacter::CheckForInteractable()
 
 				return;
 			}
-			if (TraceHit.GetActor()->Tags.Contains("Slot"))
+			if (TraceHit.GetActor()->Tags.Contains("Slot")) 
 			{
 				CurrentTag = "Slot";
 				TagInFocus.Add(CurrentTag);
@@ -235,11 +236,31 @@ void APCharacter::StartInteract()
 
 	if (TagInFocus.Contains("Device"))
 	{
-		OnDeviceActivated.Broadcast();
+		//OnDeviceActivated.Broadcast();
 		
-		GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, this, &APCharacter::DeviceTimer, 1.f, true);
+		//GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, this, &APCharacter::DeviceTimer, 1.f, true);
 
-		DeviceTimer();
+		//DeviceTimer();
+
+		DeviceRef = Cast<APawn>(ItemsToDestroy[0]);
+
+		if (DeviceRef)
+		{
+			Device = Cast<ADevice>(DeviceRef);
+
+			if (Device)
+			{
+				Device->OnBecomePossessed();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("APCharacter: Reference to Device pawn is not valid.")); 
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("APCharacter: DeviceRef cast to pawn failed."));
+		}
 	}
 	if (TagInFocus.Contains("Slot"))
 	{
@@ -250,14 +271,14 @@ void APCharacter::StartInteract()
 
 void APCharacter::DeviceTimer()
 {
-	DeviceTimerLoopCount++;
+	/*DeviceTimerLoopCount++;
 
 	if (DeviceTimerLoopCount >= 4)
 	{
 		GetWorldTimerManager().ClearTimer(InteractionTimerHandle);
 		bIsInteracting = false;
 		ItemsToDestroy[0]->Destroy();
-	}
+	}*/
 }
 
 void APCharacter::DeviceAbandoned()
@@ -291,7 +312,7 @@ void APCharacter::CompleteInteract()
 	}
 	if (TagInFocus.Contains("Device"))
 	{
-		OnDeviceAbandoned.Broadcast();
+		//OnDeviceAbandoned.Broadcast();
 	}
 }
 
