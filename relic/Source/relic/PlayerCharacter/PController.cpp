@@ -49,7 +49,7 @@ void APController::SetupInputComponent()
 	// To activate device
 	DeviceAction = NewObject<UInputAction>(this);
 	DeviceAction->ValueType = EInputActionValueType::Axis3D;
-	SetupKeyMap(PCMappingContext, DeviceAction, EKeys::G, false, false, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, DeviceAction, EKeys::E, false, true, EInputAxisSwizzle::YXZ);
 
 	// To dive 
 	DiveAction = NewObject<UInputAction>(this);

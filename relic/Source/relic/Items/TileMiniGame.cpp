@@ -1,9 +1,7 @@
-﻿#include "Device.h"
+﻿#include "TileMiniGame.h"
 
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystemInterface.h"
 #include "EnhancedInputSubsystems.h"
-#include "InputMappingContext.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/FloatingPawnMovement.h"
@@ -12,13 +10,39 @@
 #include "relic/PlayerCharacter/PCharacter.h"
 #include "relic/PlayerCharacter/PController.h"
 
-ADevice::ADevice()
+ATileMiniGame::ATileMiniGame()
 {
-	DeviceMeshComp = CreateDefaultSubobject<UStaticMeshComponent>("InstancedMesh");
-	DeviceTimelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("DeviceTimelineComp"));
-	SetRootComponent(DeviceMeshComp);
+	BaseMeshComp = CreateDefaultSubobject<UStaticMeshComponent>("InstancedMesh");
+	SetRootComponent(BaseMeshComp);
 
-	DeviceMovement = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComp");
+	TileOne = CreateDefaultSubobject<UStaticMeshComponent>("TileOneMesh");
+	TileOne->SetupAttachment(BaseMeshComp);
+
+	TileTwo = CreateDefaultSubobject<UStaticMeshComponent>("TileTwoMesh");
+	TileTwo->SetupAttachment(BaseMeshComp);
+
+	TileThree = CreateDefaultSubobject<UStaticMeshComponent>("TileThreeMesh");
+	TileThree->SetupAttachment(BaseMeshComp);
+
+	TileFour = CreateDefaultSubobject<UStaticMeshComponent>("TileFourMesh");
+	TileFour->SetupAttachment(BaseMeshComp);
+
+	TileFive = CreateDefaultSubobject<UStaticMeshComponent>("TileFiveMesh");
+	TileFive->SetupAttachment(BaseMeshComp);
+
+	TileSix = CreateDefaultSubobject<UStaticMeshComponent>("TileSixMesh");
+	TileSix->SetupAttachment(BaseMeshComp);
+
+	TileSeven = CreateDefaultSubobject<UStaticMeshComponent>("TileSevenMesh");
+	TileSeven->SetupAttachment(BaseMeshComp);
+
+	TileEight = CreateDefaultSubobject<UStaticMeshComponent>("TileEightMesh");
+	TileEight->SetupAttachment(BaseMeshComp);
+
+	TileNine = CreateDefaultSubobject<UStaticMeshComponent>("TileNineMesh");
+	TileNine->SetupAttachment(BaseMeshComp);
+
+	TileMovement = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComp");
 
 	// Setup PC Camera components
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -30,29 +54,27 @@ ADevice::ADevice()
 	// Assign SpringArm class variables
 	SpringArmComp->TargetArmLength = 300.f;
 
-	DeviceTag = "Device";
-	DeviceMeshComp->ComponentTags.Add(DeviceTag);
-	this->Tags.Add(DeviceTag);
+	MiniGameTag = "TileGame";
+	BaseMeshComp->ComponentTags.Add(MiniGameTag);
+	this->Tags.Add(MiniGameTag);
 }
 
-void ADevice::BeginPlay()
+void ATileMiniGame::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UpdateFunctionFloatCeiling.BindDynamic(this, &ADevice::UpdateTimelineComp);
 
 	PlayerCharacter = Cast<APCharacter>(GetWorld()->GetGameInstance()->GetFirstLocalPlayerController()->GetPawn());
 }
 
-void ADevice::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	APController* PlayerBaseController = CastChecked<APController>(Controller);
 
-	// TODO: Remember that you changed this from MoveAction to DeviceAction to test
-	EnhancedInputComponent->BindAction(PlayerBaseController->DeviceAction, ETriggerEvent::Triggered, this, &ADevice::Move);
+	
+	//EnhancedInputComponent->BindAction(PlayerBaseController->DeviceAction, ETriggerEvent::Triggered, this, &ADevice::Move);
 
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
 
@@ -64,12 +86,12 @@ void ADevice::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Subsystem->AddMappingContext(PlayerBaseController->PCMappingContext, 0);
 }
 
-void ADevice::Move(const FInputActionValue& Value)
+void ATileMiniGame::MoveTiles(const FInputActionValue& Value)
 {
-	//OnPuzzleSolved();
+	//TBD
 }
 
-void ADevice::OnBecomePossessed()
+void ATileMiniGame::OnBecomePossessed()
 {
 	if (PlayerCharacter)
 	{
@@ -100,28 +122,14 @@ void ADevice::OnBecomePossessed()
 		UE_LOG(LogTemp, Warning, TEXT("ADevice: Ref to Player Character not valid.")); 
 
 	}
-	
-}	
-
-void ADevice::UpdateTimelineComp(float Output)
-{
-	FRotator CurrentDeviceRotation = this->GetActorRotation();
-	
-	FRotator NewDeviceRotation = FRotator(Output, CurrentDeviceRotation.Yaw, CurrentDeviceRotation.Roll);
-	DeviceMeshComp->SetRelativeRotation(NewDeviceRotation);
 }
 
-void ADevice::OnPuzzleSolved()
+void ATileMiniGame::OnPuzzleSolved()
 {
-	DeviceTimelineComp->Play();
 }
 
-void ADevice::OnPuzzleAbandoned()
+void ATileMiniGame::OnPuzzleAbandoned()
 {
-	
 }
-
-
-	
 
 
