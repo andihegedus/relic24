@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "relic/PlayerCharacter/PCharacter.h"
 #include "relic/PlayerCharacter/PController.h"
+#include "relic/System/RelicHUD.h"
 
 ATileMiniGame::ATileMiniGame()
 {
@@ -64,6 +65,8 @@ void ATileMiniGame::BeginPlay()
 	Super::BeginPlay();
 
 	PlayerCharacter = Cast<APCharacter>(GetWorld()->GetGameInstance()->GetFirstLocalPlayerController()->GetPawn());
+
+	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 }
 
 void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -72,9 +75,9 @@ void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	APController* PlayerBaseController = CastChecked<APController>(Controller);
-
 	
-	//EnhancedInputComponent->BindAction(PlayerBaseController->DeviceAction, ETriggerEvent::Triggered, this, &ADevice::Move);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Triggered, this, &ATileMiniGame::MoveTiles);
+	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ATileMiniGame::OnPuzzleAbandoned);
 
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
 
@@ -88,7 +91,7 @@ void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void ATileMiniGame::MoveTiles(const FInputActionValue& Value)
 {
-	//TBD
+	//Click and drag logic here
 }
 
 void ATileMiniGame::OnBecomePossessed()
@@ -97,15 +100,16 @@ void ATileMiniGame::OnBecomePossessed()
 	{
 		PlayerCharacter->GetController()->Possess(this);
 		AutoPossessPlayer = EAutoReceiveInput::Player0;
+		PlayerCharacter->SetActorHiddenInGame(true);
 
 		FString CheckController = this->GetController()->GetName();
-		
 		UE_LOG(LogTemp, Warning, TEXT(" %s "), *CheckController); 
 
 		PlayerController = Cast<APController>(this->Controller);
 		
 		if (PlayerController)
 		{
+			// Not sure if this is still necessary, but it makes me feel safe
 			PCMappingContext = {PlayerController->PCMappingContext};
 		}
 		else
@@ -114,8 +118,34 @@ void ATileMiniGame::OnBecomePossessed()
 
 		}
 		
-		
 		UE_LOG(LogTemp, Warning, TEXT("ADevice: All refs valid. Pawn should be possessed.")); 
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADevice: Ref to Player Character not valid.")); 
+
+	}
+}
+
+void ATileMiniGame::OnBecomeUnPossessed()
+{
+	if (PlayerCharacter)
+	{
+		GetController()->UnPossess();
+		PlayerCharacter->AutoPossessPlayer = EAutoReceiveInput::Player0;
+		PlayerCharacter->SetActorHiddenInGame(false);
+
+		PlayerController = Cast<APController>(GetWorld()->GetGameInstance()->GetPrimaryPlayerController());
+		
+		if (PlayerController)
+		{
+			PlayerController->Possess(PlayerCharacter);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ADevice: Ref to Player Contoller not valid."));
+
+		}
 	}
 	else
 	{
@@ -130,6 +160,9 @@ void ATileMiniGame::OnPuzzleSolved()
 
 void ATileMiniGame::OnPuzzleAbandoned()
 {
+	// Something to save the puzzle state here
+	
+	OnBecomeUnPossessed();
 }
 
 

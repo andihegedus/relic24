@@ -5,6 +5,7 @@
 #include "InputAction.h"
 #include "TileMiniGame.generated.h"
 
+class ARelicHUD;
 class UFloatingPawnMovement;
 class APCharacter;
 class APController;
@@ -40,6 +41,9 @@ public:
 	UFUNCTION()
 	void OnBecomePossessed();
 
+	UFUNCTION()
+	void OnBecomeUnPossessed();
+
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 
@@ -50,6 +54,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APController* PlayerController;
+
+	UPROPERTY()
+	ARelicHUD* HUD;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UInputMappingContext* PCMappingContext;

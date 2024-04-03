@@ -48,8 +48,18 @@ void APController::SetupInputComponent()
 
 	// To activate device
 	DeviceAction = NewObject<UInputAction>(this);
-	DeviceAction->ValueType = EInputActionValueType::Axis3D;
-	SetupKeyMap(PCMappingContext, DeviceAction, EKeys::E, false, true, EInputAxisSwizzle::YXZ);
+	DeviceAction->ValueType = EInputActionValueType::Boolean;
+	SetupKeyMap(PCMappingContext, DeviceAction, EKeys::E, false, false, EInputAxisSwizzle::YXZ);
+
+	// To play Tile Mini Game
+	TileGameAction = NewObject<UInputAction>(this);
+	TileGameAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, TileGameAction, EKeys::LeftMouseButton, false, false, EInputAxisSwizzle::YXZ);
+
+	// To back out of screen
+	EscapeAction = NewObject<UInputAction>(this);
+	EscapeAction->ValueType = EInputActionValueType::Boolean;
+	SetupKeyMap(PCMappingContext, EscapeAction, EKeys::Escape, false, false, EInputAxisSwizzle::YXZ);
 
 	// To dive 
 	DiveAction = NewObject<UInputAction>(this);

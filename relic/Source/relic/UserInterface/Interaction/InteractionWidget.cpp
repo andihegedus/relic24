@@ -14,7 +14,7 @@ void UInteractionWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	ActionText->SetText(FText::FromString("Press"));
-	ResultText->SetText(FText::FromString("to take item."));
+	ResultText->SetText(FText::FromString(" "));
 	InteractionProgressBar->SetPercent(0.f);
 }
 
@@ -41,6 +41,13 @@ void UInteractionWidget::UpdateWidget(const TArray<FName> Tags)
 			KeyIcon->SetVisibility(ESlateVisibility::Visible);
 			ActionText->SetText(FText::FromString("Press"));
 			ResultText->SetText(FText::FromString("to place medallion."));
+			InteractionProgressBar->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		if (Tags.Contains("TileGame"))
+		{
+			KeyIcon->SetVisibility(ESlateVisibility::Visible);
+			ActionText->SetText(FText::FromString("Press"));
+			ResultText->SetText(FText::FromString("to investigate."));
 			InteractionProgressBar->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}

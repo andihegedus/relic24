@@ -7,6 +7,7 @@
 #include "relic/Items/Doors/TombCeilingDoor.h"
 #include "PCharacter.generated.h"
 
+class ATileMiniGame;
 class ADevice;
 class ATombCeilingDoor;
 class ARelicHUD;
@@ -86,6 +87,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Puzzle | Solutions")
 	TArray<AActor*> ItemsToAppear;
 
+	UPROPERTY(VisibleAnywhere, Category="Puzzle | MiniGame")
+	TArray<AActor*> PuzzlesToSolve;
+
 	bool bIsInteracting;
 
 	bool bIsDiving;
@@ -113,6 +117,12 @@ public:
 	UPROPERTY()
 	APawn* DeviceRef;
 
+	UPROPERTY()
+	ATileMiniGame* TileGame;
+
+	UPROPERTY()
+	APawn* TileGameRef;
+
 protected:
 	// FUNCTIONS
 	// -----------------------------
@@ -130,7 +140,8 @@ protected:
 	void NoInteractableFound();
 	void StartInteract();
 	void CompleteInteract();
-	void DeviceTimer();
+
+	// Might move this to Device script
 	void DeviceAbandoned();
 
 	// End State

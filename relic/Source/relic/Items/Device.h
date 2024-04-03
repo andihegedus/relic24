@@ -16,6 +16,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UCurveFloat;
 class UInputAction;
+class ARelicHUD;
 
 
 UCLASS()
@@ -33,6 +34,8 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	void Move(const FInputActionValue& Value);
+
+	void StopMove(const FInputActionValue& Value);
 	
 	UFUNCTION()
 	void OnPuzzleSolved();
@@ -43,7 +46,8 @@ public:
 	UFUNCTION()
 	void OnBecomePossessed();
 
-	
+	UFUNCTION()
+	void OnBecomeUnPossessed();
 	
 
 	// PROPERTIES & VARIABLES
@@ -65,6 +69,12 @@ public:
 
 	UPROPERTY()
 	class UInputAction* MoveAction;
+
+	UPROPERTY()
+	ARelicHUD* HUD;
+
+	UPROPERTY()
+	FRotator OriginalRotation;
 
 protected:
 	// FUNCTIONS
@@ -89,7 +99,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UTimelineComponent* DeviceTimelineComp;
 
-	FOnTimelineFloat UpdateFunctionFloatCeiling;
+	FOnTimelineFloat UpdateFunctionFloat;
 	
 	
 	

@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "relic/Items/Device.h"
 #include "relic/Items/Pickup.h"
+#include "relic/Items/TileMiniGame.h"
 #include "relic/Items/Doors/TombCeilingDoor.h"
 #include "relic/System/RelicHUD.h"
 #include "relic/PlayerCharacter/PController.h"
@@ -33,6 +34,7 @@ APCharacter::APCharacter()
 	SpringArmComp->TargetArmLength = 300.f;
 	SpringArmComp->bEnableCameraLag = true;
 	SpringArmComp->CameraLagSpeed = 3.0f;
+	SpringArmComp->bUsePawnControlRotation = true;
 
 	// Take control of the default player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -198,13 +200,27 @@ void APCharacter::CheckForInteractable()
 
 				return;
 			}
+			if (TraceHit.GetActor()->Tags.Contains("TileGame")) 
+			{
+				CurrentTag = "TileGame";
+				TagInFocus.Add(CurrentTag);
+		
+				FoundInteractable();
+
+				PuzzlesToSolve.Add(TraceHit.GetActor());
+
+				return;
+			}
 		}
 	}
 	
 	NoInteractableFound();
 	TagInFocus.Empty();
+
+	// TODO: These could potentially be narrowed down to one array, since player should only be able to interact with one item at a time
 	ItemsToDestroy.Empty();
 	ItemsToAppear.Empty();
+	PuzzlesToSolve.Empty();
 }
 
 void APCharacter::FoundInteractable()
@@ -221,6 +237,10 @@ void APCharacter::FoundInteractable()
 	{
 		HUD->UpdateInteractionWidget("Slot");
 	}
+	if (TagInFocus.Contains("TileGame"))
+	{
+		HUD->UpdateInteractionWidget("TileGame");
+	}
 }
 
 void APCharacter::NoInteractableFound()
@@ -236,12 +256,6 @@ void APCharacter::StartInteract()
 
 	if (TagInFocus.Contains("Device"))
 	{
-		//OnDeviceActivated.Broadcast();
-		
-		//GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, this, &APCharacter::DeviceTimer, 1.f, true);
-
-		//DeviceTimer();
-
 		DeviceRef = Cast<APawn>(ItemsToDestroy[0]);
 
 		if (DeviceRef)
@@ -251,6 +265,7 @@ void APCharacter::StartInteract()
 			if (Device)
 			{
 				Device->OnBecomePossessed();
+				HUD->HideInteractionWidget();
 			}
 			else
 			{
@@ -262,23 +277,33 @@ void APCharacter::StartInteract()
 			UE_LOG(LogTemp, Warning, TEXT("APCharacter: DeviceRef cast to pawn failed."));
 		}
 	}
+	if (TagInFocus.Contains("TileGame"))
+	{
+		TileGameRef = Cast<APawn>(PuzzlesToSolve[0]);
+
+		if (TileGameRef)
+		{
+			TileGame = Cast<ATileMiniGame>(TileGameRef);
+
+			if (TileGame)
+			{
+				TileGame->OnBecomePossessed();
+				HUD->HideInteractionWidget();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("APCharacter: Reference to TileMiniGame pawn is not valid.")); 
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("APCharacter: TileGameRef cast to pawn failed."));
+		}
+	}
 	if (TagInFocus.Contains("Slot"))
 	{
 		OnMedallionPlaced.Broadcast();
 	}
-}
-
-
-void APCharacter::DeviceTimer()
-{
-	/*DeviceTimerLoopCount++;
-
-	if (DeviceTimerLoopCount >= 4)
-	{
-		GetWorldTimerManager().ClearTimer(InteractionTimerHandle);
-		bIsInteracting = false;
-		ItemsToDestroy[0]->Destroy();
-	}*/
 }
 
 void APCharacter::DeviceAbandoned()
@@ -312,7 +337,11 @@ void APCharacter::CompleteInteract()
 	}
 	if (TagInFocus.Contains("Device"))
 	{
-		//OnDeviceAbandoned.Broadcast();
+		// Not sure if unpossession will happen here or in the Device script
+	}
+	if (TagInFocus.Contains("TileGame"))
+	{
+		// Not sure if unpossession will happen here or in the TileMiniGame script
 	}
 }
 
@@ -342,8 +371,6 @@ void APCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	
 	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Triggered, this, &APCharacter::StartInteract);
 	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Completed, this, &APCharacter::CompleteInteract);
-
-	//EnhancedInputComponent->BindAction(PlayerBaseController->DeviceAction, ETriggerEvent::Triggered, this, &APCharacter::StartInteract);
 	
 	EnhancedInputComponent->BindAction(PlayerBaseController->DiveAction, ETriggerEvent::Completed, this, &APCharacter::Dive);
 

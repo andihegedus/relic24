@@ -42,9 +42,6 @@ public:
 	class UInputAction* InteractAction;
 
 	UPROPERTY()
-	class UInputAction* DeviceAction;
-
-	UPROPERTY()
 	class UInputAction* AimAction;
 
 	UPROPERTY()
@@ -52,5 +49,14 @@ public:
 
 	UPROPERTY()
 	class UInputAction* ToggleDebugMenuAction;
+
+	UPROPERTY()
+	class UInputAction* DeviceAction;
+
+	UPROPERTY()
+	class UInputAction* TileGameAction;
+
+	UPROPERTY()
+	class UInputAction* EscapeAction;
 	
 };
