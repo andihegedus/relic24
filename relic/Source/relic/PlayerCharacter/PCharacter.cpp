@@ -4,21 +4,14 @@
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Components/BoxComponent.h"
-#include "Components/ProgressBar.h"
-#include "Components/SlateWrapperTypes.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "relic/Items/Device.h"
-#include "relic/Items/Pickup.h"
 #include "relic/Items/TileMiniGame.h"
-#include "relic/Items/Doors/TombCeilingDoor.h"
 #include "relic/System/RelicHUD.h"
 #include "relic/PlayerCharacter/PController.h"
-#include "relic/UserInterface/Interaction/InteractionWidget.h"
 #include "relic/UserInterface/PlayerState/OxygenMeterWidget.h"
 
 APCharacter::APCharacter()
@@ -87,7 +80,7 @@ void APCharacter::Tick(float DeltaSeconds)
 
 	if (bIsDiving)
 	{
-		HUD->OxygenMeterWidget->UpdateWidget(OxygenTimerHandle, 102 - DiveTimerLoopCount);
+		HUD->OxygenMeterWidget->UpdateWidget(OxygenTimerHandle, 101 - DiveTimerLoopCount);
 	}
 }
 
@@ -141,8 +134,6 @@ void APCharacter::DiveTimer()
 
 void APCharacter::CheckForInteractable()
 {
-	//
-	
 	InteractionInfo.CheckLastInteractionTime = GetWorld()->GetTimeSeconds();
 	
 	LineTraceStart = GetPawnViewLocation();

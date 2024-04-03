@@ -28,9 +28,13 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaSeconds) override;
+
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	void MoveTiles(const FInputActionValue& Value);
+	void SelectTile(const FInputActionValue& Value);
+	//void DragTiles(const FInputActionValue& Value);
+	void DropTiles(const FInputActionValue& Value);
 	
 	UFUNCTION()
 	void OnPuzzleSolved();
@@ -48,6 +52,8 @@ public:
 	// -----------------------------
 
 	FName MiniGameTag;
+
+	bool bIsGaming;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APCharacter* PlayerCharacter;
@@ -69,8 +75,14 @@ protected:
 
 	// PROPERTIES & VARIABLES
 	// -----------------------------
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> TileInFocus;
+	
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
 	UStaticMeshComponent* BaseMeshComp;
+
+	UPROPERTY(VisibleAnywhere, Category="Device | Components")
+	TArray<UStaticMeshComponent*> Tiles;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
 	UStaticMeshComponent* TileOne;

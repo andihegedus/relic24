@@ -55,6 +55,8 @@ void APController::SetupInputComponent()
 	TileGameAction = NewObject<UInputAction>(this);
 	TileGameAction->ValueType = EInputActionValueType::Axis3D;
 	SetupKeyMap(PCMappingContext, TileGameAction, EKeys::LeftMouseButton, false, false, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, TileGameAction, EKeys::MouseY, false, false, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, TileGameAction, EKeys::MouseX, false, true, EInputAxisSwizzle::YXZ);
 
 	// To back out of screen
 	EscapeAction = NewObject<UInputAction>(this);
