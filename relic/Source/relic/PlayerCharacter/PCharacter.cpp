@@ -144,7 +144,7 @@ void APCharacter::CheckForInteractable()
 	if (LookDirection > 0)
 	{
 		// Visualize our trace hit line
-		//DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd, FColor::Magenta, false, 1.0f, 0, 2.f);
+		DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd, FColor::Magenta, false, 1.0f, 0, 2.f);
 
 		// Contains useful things for line tracing
 		FCollisionQueryParams QueryParams;
