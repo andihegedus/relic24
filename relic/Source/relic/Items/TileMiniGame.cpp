@@ -15,45 +15,55 @@
 
 ATileMiniGame::ATileMiniGame()
 {
-	BaseMeshComp = CreateDefaultSubobject<UStaticMeshComponent>("InstancedMesh");
+	BaseMeshComp = CreateDefaultSubobject<UStaticMeshComponent>("BaseMeshComp");
 	SetRootComponent(BaseMeshComp);
+	
+	BaseMeshComp->SetSimulatePhysics(true);
+	BaseMeshComp->GetBodyInstance()->bLockRotation = true;
+	BaseMeshComp->GetBodyInstance()->bLockTranslation = true;
+
+	InvisibleBarrierComp = CreateDefaultSubobject<UStaticMeshComponent>("InvisibleBarrierComp");
+	InvisibleBarrierComp->SetSimulatePhysics(true);
+	InvisibleBarrierComp->GetBodyInstance()->bLockRotation = true;
+	InvisibleBarrierComp->GetBodyInstance()->bLockTranslation = true;
+	InvisibleBarrierComp->SetHiddenInGame(true);
+	InvisibleBarrierComp->SetupAttachment(BaseMeshComp);
 
 	// TODO: There's probably a cleaner way to do this
 	TileOne = CreateDefaultSubobject<UStaticMeshComponent>("TileOneMesh");
-	TileOne->SetupAttachment(BaseMeshComp);
 	Tiles.Add(TileOne);
 
-	TileTwo = CreateDefaultSubobject<UStaticMeshComponent>("TileTwoMesh");
-	TileTwo->SetupAttachment(BaseMeshComp);
+	TileTwo = CreateDefaultSubobject<UStaticMeshComponent>("TileTwoMesh");;
 	Tiles.Add(TileTwo);
 
 	TileThree = CreateDefaultSubobject<UStaticMeshComponent>("TileThreeMesh");
-	TileThree->SetupAttachment(BaseMeshComp);
 	Tiles.Add(TileThree);
 
 	TileFour = CreateDefaultSubobject<UStaticMeshComponent>("TileFourMesh");
-	TileFour->SetupAttachment(BaseMeshComp);
 	Tiles.Add(TileFour);
 
 	TileFive = CreateDefaultSubobject<UStaticMeshComponent>("TileFiveMesh");
-	TileFive->SetupAttachment(BaseMeshComp);
 	Tiles.Add(TileFive);
 
 	TileSix = CreateDefaultSubobject<UStaticMeshComponent>("TileSixMesh");
-	TileSix->SetupAttachment(BaseMeshComp);
 	Tiles.Add(TileSix);
 
 	TileSeven = CreateDefaultSubobject<UStaticMeshComponent>("TileSevenMesh");
-	TileSeven->SetupAttachment(BaseMeshComp);
 	Tiles.Add(TileSeven);
 
 	TileEight = CreateDefaultSubobject<UStaticMeshComponent>("TileEightMesh");
-	TileEight->SetupAttachment(BaseMeshComp);
 	Tiles.Add(TileEight);
 
 	TileNine = CreateDefaultSubobject<UStaticMeshComponent>("TileNineMesh");
-	TileNine->SetupAttachment(BaseMeshComp);
 	Tiles.Add(TileNine);
+
+	for (int i = 1; i < Tiles.Num(); i++)
+	{
+		Tiles[i]->SetupAttachment(BaseMeshComp);
+		Tiles[i]->SetSimulatePhysics(true);
+		Tiles[i]->GetBodyInstance()->bLockRotation = true;
+		//Tiles[i]->GetBodyInstance()->bLockTranslation = true;
+	}
 
 	TileMovement = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComp");
 
@@ -95,10 +105,12 @@ void ATileMiniGame::Tick(float DeltaSeconds)
 		FVector2D MousePosition;
 
 		// IsMouseButton is looking for input from the button itself, not the mouse axis
-		if (PlayerController->GetGameInstance()->GetGameViewportClient()->GetMousePosition(MousePosition) && KeyPressed.IsMouseButton())
+		if (PlayerController->GetGameInstance()->GetGameViewportClient()->GetMousePosition(MousePosition)) // && KeyPressed.IsMouseButton()
 		{
 			FVector TileLocation = TileInFocus[0]->GetComponentLocation();
-			TileInFocus[0]->SetWorldLocation(FVector(TileLocation.X, MousePosition.X, TileLocation.Z));
+
+			// There has to be a better way to convert 2D space to 3D world space, but I haven't found it yet - I don't recommend the method below
+			TileInFocus[0]->SetRelativeLocation(FVector(TileLocation.X + 3535, -MousePosition.X + 755, -MousePosition.Y + 250));
 
 			//check(GEngine != nullptr);
 
@@ -119,6 +131,7 @@ void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	// TODO: Break Select & Move tiles into separate actions again, use MouseX & Mouse Y to select, use LMB to drag
 	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Triggered, this, &ATileMiniGame::SelectTile);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Ongoing, this, &ATileMiniGame::DragTiles);
 	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Completed, this, &ATileMiniGame::DropTiles);
 	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ATileMiniGame::OnPuzzleAbandoned);
 
@@ -165,6 +178,30 @@ void ATileMiniGame::SelectTile(const FInputActionValue& Value)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Contoller not valid."));
 	}
+}
+
+void ATileMiniGame::DragTiles(const FInputActionValue& Value)
+{
+	/*FKey KeyPressed = EKeys::LeftMouseButton;
+	
+	if (TileInFocus.Num() > 0 && bIsGaming)
+	{
+		FVector2D MousePosition;
+
+		// IsMouseButton is looking for input from the button itself, not the mouse axis
+		if (PlayerController->GetGameInstance()->GetGameViewportClient()->GetMousePosition(MousePosition) && KeyPressed.IsMouseButton())
+		{
+			FVector TileLocation = TileInFocus[0]->GetComponentLocation();
+			TileInFocus[0]->SetWorldLocation(FVector(TileLocation.X, MousePosition.X, TileLocation.Z));
+
+			//check(GEngine != nullptr);
+
+			//FString MousePosString = MousePosition.ToString();
+			//UE_LOG(LogTemp, Warning, TEXT(" %s "), *MousePosString); 
+
+			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, MousePosString);
+		}
+	}*/
 }
 
 void ATileMiniGame::DropTiles(const FInputActionValue& Value)

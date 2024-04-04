@@ -33,7 +33,7 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	void SelectTile(const FInputActionValue& Value);
-	//void DragTiles(const FInputActionValue& Value);
+	void DragTiles(const FInputActionValue& Value);
 	void DropTiles(const FInputActionValue& Value);
 	
 	UFUNCTION()
@@ -80,6 +80,9 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
 	UStaticMeshComponent* BaseMeshComp;
+
+	UPROPERTY(VisibleAnywhere, Category="Device | Components")
+	UStaticMeshComponent* InvisibleBarrierComp;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
 	TArray<UStaticMeshComponent*> Tiles;

@@ -57,6 +57,9 @@ public:
 	class UInputAction* TileGameAction;
 
 	UPROPERTY()
+	class UInputAction* SelectTileAction;
+
+	UPROPERTY()
 	class UInputAction* EscapeAction;
 	
 };
