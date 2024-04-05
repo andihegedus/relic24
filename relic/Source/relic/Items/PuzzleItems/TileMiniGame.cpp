@@ -81,6 +81,9 @@ void ATileMiniGame::BeginPlay()
 	PlayerCharacter = Cast<APCharacter>(GetWorld()->GetGameInstance()->GetFirstLocalPlayerController()->GetPawn());
 
 	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+
+	// true for testing, until functionality is complete
+	bSolvedTilePuzzle = true;
 }
 
 void ATileMiniGame::Tick(float DeltaSeconds)
@@ -110,29 +113,6 @@ void ATileMiniGame::Tick(float DeltaSeconds)
 			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, MousePosString);
 		}
 	}
-}
-
-void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
-	APController* PlayerBaseController = CastChecked<APController>(Controller);
-
-	// TODO: Break Select & Move tiles into separate actions again, use MouseX & Mouse Y to select, use LMB to drag
-	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Triggered, this, &ATileMiniGame::SelectTile);
-	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Ongoing, this, &ATileMiniGame::DragTiles);
-	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Completed, this, &ATileMiniGame::DropTiles);
-	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ATileMiniGame::OnPuzzleAbandoned);
-
-	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
-
-	check(LocalPlayer);
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-
-	check(Subsystem);
-	Subsystem->ClearAllMappings();
-	Subsystem->AddMappingContext(PlayerBaseController->PCMappingContext, 0);
 }
 
 void ATileMiniGame::SelectTile(const FInputActionValue& Value)
@@ -250,6 +230,11 @@ void ATileMiniGame::OnBecomeUnPossessed()
 		{
 			PlayerController->Possess(PlayerCharacter);
 			PlayerController->SetShowMouseCursor(false);
+
+			if (bSolvedTilePuzzle)
+			{
+				PlayerCharacter->OnTilePuzzleSolved.Broadcast();
+			}
 		}
 		else
 		{
@@ -266,6 +251,7 @@ void ATileMiniGame::OnBecomeUnPossessed()
 
 void ATileMiniGame::OnPuzzleSolved()
 {
+	
 }
 
 void ATileMiniGame::OnPuzzleAbandoned()
@@ -276,3 +262,25 @@ void ATileMiniGame::OnPuzzleAbandoned()
 }
 
 
+void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+	APController* PlayerBaseController = CastChecked<APController>(Controller);
+
+	// TODO: Break Select & Move tiles into separate actions again, use MouseX & Mouse Y to select, use LMB to drag
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Triggered, this, &ATileMiniGame::SelectTile);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Ongoing, this, &ATileMiniGame::DragTiles);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Completed, this, &ATileMiniGame::DropTiles);
+	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ATileMiniGame::OnPuzzleAbandoned);
+
+	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
+
+	check(LocalPlayer);
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+
+	check(Subsystem);
+	Subsystem->ClearAllMappings();
+	Subsystem->AddMappingContext(PlayerBaseController->PCMappingContext, 0);
+}

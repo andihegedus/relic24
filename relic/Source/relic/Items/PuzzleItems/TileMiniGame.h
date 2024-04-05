@@ -18,6 +18,8 @@ class UInputMappingContext;
 class UCurveFloat;
 class UInputAction;
 
+
+
 UCLASS()
 class ATileMiniGame : public APawn
 {
@@ -67,6 +69,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UInputMappingContext* PCMappingContext;
+
+	UPROPERTY()
+	bool bSolvedTilePuzzle;
 
 protected:
 	// FUNCTIONS
