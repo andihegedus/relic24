@@ -61,5 +61,8 @@ public:
 
 	UPROPERTY()
 	class UInputAction* EscapeAction;
+
+	UPROPERTY()
+	class UInputAction* CloseDialogueAction;
 	
 };

@@ -20,6 +20,7 @@ DECLARE_MULTICAST_DELEGATE(FOnMedallionPlaced);
 DECLARE_MULTICAST_DELEGATE(FOnTilePuzzleSolved);
 DECLARE_MULTICAST_DELEGATE(FOnDeviceActivated);
 DECLARE_MULTICAST_DELEGATE(FOnDeviceAbandoned);
+DECLARE_MULTICAST_DELEGATE(FOnEnterButtonPressed);
 
 USTRUCT()
 struct FInteractionInfo
@@ -65,7 +66,8 @@ public:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
-
+	//Dialogue
+	void CloseDialogueBox();
 
 	// PROPERTIES & VARIABLES
 	// -----------------------------
@@ -77,6 +79,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
 	TArray<FName> TagInFocus;
+
+	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
+	TArray<FName> TriggerTags;
 
 	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
 	int32 InventoryQuantity;
@@ -107,6 +112,8 @@ public:
 	FOnDeviceActivated OnDeviceActivated;
 
 	FOnDeviceAbandoned OnDeviceAbandoned;
+
+	FOnEnterButtonPressed OnEnterButtonPressed;
 	
 	UPROPERTY()
 	ATombCeilingDoor* TombCeilingDoor;

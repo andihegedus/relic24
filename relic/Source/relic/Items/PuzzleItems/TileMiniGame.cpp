@@ -3,6 +3,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/Slider.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/FloatingPawnMovement.h"
@@ -15,19 +16,11 @@
 
 ATileMiniGame::ATileMiniGame()
 {
-	BaseMeshComp = CreateDefaultSubobject<UStaticMeshComponent>("BaseMeshComp");
-	SetRootComponent(BaseMeshComp);
+	BoxCollision = CreateDefaultSubobject<UBoxComponent>("BoxCollision");
+	SetRootComponent(BoxCollision);
 	
-	BaseMeshComp->SetSimulatePhysics(true);
-	BaseMeshComp->GetBodyInstance()->bLockRotation = true;
-	BaseMeshComp->GetBodyInstance()->bLockTranslation = true;
-
-	InvisibleBarrierComp = CreateDefaultSubobject<UStaticMeshComponent>("InvisibleBarrierComp");
-	InvisibleBarrierComp->SetSimulatePhysics(true);
-	InvisibleBarrierComp->GetBodyInstance()->bLockRotation = true;
-	InvisibleBarrierComp->GetBodyInstance()->bLockTranslation = true;
-	InvisibleBarrierComp->SetHiddenInGame(true);
-	InvisibleBarrierComp->SetupAttachment(BaseMeshComp);
+	TileHolder = CreateDefaultSubobject<UStaticMeshComponent>("TileHolder");
+	TileHolder->SetupAttachment(BoxCollision);
 
 	// TODO: There's probably a cleaner way to do this
 	TileOne = CreateDefaultSubobject<UStaticMeshComponent>("TileOneMesh");
@@ -57,12 +50,9 @@ ATileMiniGame::ATileMiniGame()
 	TileNine = CreateDefaultSubobject<UStaticMeshComponent>("TileNineMesh");
 	Tiles.Add(TileNine);
 
-	for (int i = 1; i < Tiles.Num(); i++)
+	for (int i = 0; i < Tiles.Num(); i++)
 	{
-		Tiles[i]->SetupAttachment(BaseMeshComp);
-		Tiles[i]->SetSimulatePhysics(true);
-		Tiles[i]->GetBodyInstance()->bLockRotation = true;
-		//Tiles[i]->GetBodyInstance()->bLockTranslation = true;
+		Tiles[i]->SetupAttachment(BoxCollision);
 	}
 
 	TileMovement = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComp");
@@ -78,7 +68,7 @@ ATileMiniGame::ATileMiniGame()
 	SpringArmComp->TargetArmLength = 300.f;
 
 	MiniGameTag = "TileGame";
-	BaseMeshComp->ComponentTags.Add(MiniGameTag);
+	BoxCollision->ComponentTags.Add(MiniGameTag);
 	this->Tags.Add(MiniGameTag);
 
 	bIsGaming = false;

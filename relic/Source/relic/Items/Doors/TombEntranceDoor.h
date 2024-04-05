@@ -27,6 +27,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	UCurveFloat* DoorTimelineCurveFloat;
 
+	UPROPERTY(EditAnywhere)
+	FVector CurrentDoorLocation;
+
 protected:
 	// FUNCTIONS
 	// -----------------------------

@@ -62,10 +62,15 @@ void APController::SetupInputComponent()
 	SetupKeyMap(PCMappingContext, SelectTileAction, EKeys::MouseY, false, false, EInputAxisSwizzle::YXZ);
 	SetupKeyMap(PCMappingContext, SelectTileAction, EKeys::MouseX, false, true, EInputAxisSwizzle::YXZ);
 
-	// To back out of screen
+	// To back out of puzzle screen, UnPossess puzzle
 	EscapeAction = NewObject<UInputAction>(this);
 	EscapeAction->ValueType = EInputActionValueType::Boolean;
 	SetupKeyMap(PCMappingContext, EscapeAction, EKeys::Escape, false, false, EInputAxisSwizzle::YXZ);
+
+	// To close the dialogue box
+	CloseDialogueAction = NewObject<UInputAction>(this);
+	CloseDialogueAction->ValueType = EInputActionValueType::Boolean;
+	SetupKeyMap(PCMappingContext, CloseDialogueAction, EKeys::Enter, false, false, EInputAxisSwizzle::YXZ);
 
 	// To dive 
 	DiveAction = NewObject<UInputAction>(this);

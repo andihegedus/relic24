@@ -5,6 +5,7 @@
 #include "InputAction.h"
 #include "TileMiniGame.generated.h"
 
+class UBoxComponent;
 class ARelicHUD;
 class UFloatingPawnMovement;
 class APCharacter;
@@ -78,11 +79,11 @@ protected:
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> TileInFocus;
 	
-	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* BaseMeshComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Device | Components")
+	UBoxComponent* BoxCollision;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* InvisibleBarrierComp;
+	UStaticMeshComponent* TileHolder;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
 	TArray<UStaticMeshComponent*> Tiles;

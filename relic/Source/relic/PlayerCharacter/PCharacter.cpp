@@ -8,8 +8,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "relic/Items/Device.h"
-#include "relic/Items/TileMiniGame.h"
+#include "relic/Items/DialogueTrigger.h"
+#include "relic/Items/PuzzleItems/Device.h"
+#include "relic/Items/PuzzleItems/TileMiniGame.h"
 #include "relic/System/RelicHUD.h"
 #include "relic/PlayerCharacter/PController.h"
 #include "relic/UserInterface/PlayerState/OxygenMeterWidget.h"
@@ -336,6 +337,20 @@ void APCharacter::CompleteInteract()
 	}
 }
 
+void APCharacter::CloseDialogueBox()
+{
+	if (TriggerTags.Num() > 0)
+	{
+		OnEnterButtonPressed.Broadcast();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("APCharacter: TriggerTags has no elements in it."));
+	}
+
+	TriggerTags.Empty();
+}
+
 
 void APCharacter::Death()
 {
@@ -364,6 +379,8 @@ void APCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Completed, this, &APCharacter::CompleteInteract);
 	
 	EnhancedInputComponent->BindAction(PlayerBaseController->DiveAction, ETriggerEvent::Completed, this, &APCharacter::Dive);
+
+	EnhancedInputComponent->BindAction(PlayerBaseController->CloseDialogueAction, ETriggerEvent::Completed, this, &APCharacter::CloseDialogueBox);
 
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
 

@@ -6,11 +6,12 @@
 ATombEntranceDoor::ATombEntranceDoor()
 {
 	Door = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMesh"));
+	SetRootComponent(Door);
 	DoorTimelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("DoorTimelineComp"));
 	DoorProxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("DoorProximityTigger"));
-
-	Door->SetupAttachment(RootComponent);
 	DoorProxTrigger->AttachToComponent(Door, FAttachmentTransformRules::KeepRelativeTransform);
+
+	CurrentDoorLocation = this->GetActorLocation();
 }
 
 void ATombEntranceDoor::BeginPlay()
@@ -30,9 +31,7 @@ void ATombEntranceDoor::BeginPlay()
 
 void ATombEntranceDoor::UpdateTimelineComp(float Output)
 {
-	FVector CurrentDoorLocation = this->GetActorLocation();
-	
-	FVector NewDoorLocation = FVector(Output, CurrentDoorLocation.Y, CurrentDoorLocation.Z);
+	FVector NewDoorLocation = FVector(CurrentDoorLocation.X + 250, -Output + 300, CurrentDoorLocation.Z);
 	Door->SetRelativeLocation(NewDoorLocation);
 }
 

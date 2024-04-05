@@ -46,7 +46,7 @@ void UInventoryWidget::UpdateWidget(const TArray<FName> Tags)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Player character not valid."));
+				UE_LOG(LogTemp, Warning, TEXT("InventoryWidget: Player character not valid."));
 			}
 			
 		}
@@ -75,7 +75,7 @@ void UInventoryWidget::UpdateWidget(const TArray<FName> Tags)
             }
             else
             {
-                UE_LOG(LogTemp, Warning, TEXT("Player character not valid."));
+                UE_LOG(LogTemp, Warning, TEXT("InventoryWidget: Player character not valid."));
             }
             
         }

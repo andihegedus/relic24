@@ -2,14 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Image.h"
-#include "Components/TextBlock.h"
 #include "InteractionWidget.generated.h"
 
 class APCharacter;
 class APickup;
 class UProgressBar;
 class UTextBlock;
+class UImage;
 class UHorizontalBox;
 
 UCLASS()

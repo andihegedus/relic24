@@ -2,7 +2,8 @@
 
 #include "Components/HorizontalBox.h"
 #include "Components/ProgressBar.h"
-#include "relic/PlayerCharacter/PCharacter.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
 
 void UInteractionWidget::NativeOnInitialized()
 {

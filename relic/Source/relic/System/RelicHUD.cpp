@@ -3,6 +3,7 @@
 #include "relic/PlayerCharacter/PCharacter.h"
 #include "relic/UserInterface/Interaction/InteractionWidget.h"
 #include "relic/UserInterface/Inventory/InventoryWidget.h"
+#include "relic/UserInterface/PlayerState/DialogueWidget.h"
 #include "relic/UserInterface/PlayerState/OxygenMeterWidget.h"
 
 ARelicHUD::ARelicHUD()
@@ -30,6 +31,12 @@ void ARelicHUD::BeginPlay()
 		OxygenMeterWidget = CreateWidget<UOxygenMeterWidget>(GetWorld(), OxygenMeterWidgetClass);
 		OxygenMeterWidget->AddToViewport();
 		OxygenMeterWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (DialogueWidgetClass)
+	{
+		DialogueWidget = CreateWidget<UDialogueWidget>(GetWorld(), DialogueWidgetClass);
+		DialogueWidget->AddToViewport();
+		DialogueWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	
 	PlayerCharacter = Cast<APCharacter>(GetOwningPawn());
@@ -97,12 +104,32 @@ void ARelicHUD::UpdateInventoryWidget(const FName Tag) const
 	}
 }
 
-void ARelicHUD::ShowDialogueWidget()
+void ARelicHUD::UpdateDialogueWidget()
 {
+	if (DialogueWidget)
+	{
+		if (DialogueWidget->GetVisibility() == ESlateVisibility::Collapsed)
+		{
+			DialogueWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+		if (PlayerCharacter)
+		{
+			// Might need different array for dialogue triggers
+			DialogueWidget->UpdateWidget(PlayerCharacter->TriggerTags);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("HUD: no valid player character found in world.")); 
+		}
+	}
 }
 
 void ARelicHUD::HideDialogueWidget()
 {
+	if (DialogueWidget)
+	{
+		DialogueWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 void ARelicHUD::ShowOxygenMeterWidget()
