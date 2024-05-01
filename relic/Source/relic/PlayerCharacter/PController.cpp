@@ -61,6 +61,7 @@ void APController::SetupInputComponent()
 	SelectTileAction->ValueType = EInputActionValueType::Axis3D;
 	SetupKeyMap(PCMappingContext, SelectTileAction, EKeys::MouseY, false, false, EInputAxisSwizzle::YXZ);
 	SetupKeyMap(PCMappingContext, SelectTileAction, EKeys::MouseX, false, true, EInputAxisSwizzle::YXZ);
+	//SetupKeyMap(PCMappingContext, SelectTileAction, EKeys::LeftMouseButton, false, true, EInputAxisSwizzle::YXZ);
 
 	// To back out of puzzle screen, UnPossess puzzle
 	EscapeAction = NewObject<UInputAction>(this);

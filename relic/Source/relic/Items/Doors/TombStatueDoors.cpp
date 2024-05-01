@@ -28,7 +28,7 @@ void ATombStatueDoors::BeginPlay()
 
 	if (PlayerCharacter)
 	{
-		PlayerCharacter->OnMedallionPlaced.AddUObject(this, &ATombStatueDoors::OnPuzzleSolved);
+		PlayerCharacter->OnTilePuzzleSolved.AddUObject(this, &ATombStatueDoors::OnPuzzleSolved);
 	}
 	else
 	{
@@ -45,7 +45,7 @@ void ATombStatueDoors::UpdateTimelineComp(float Output)
 {
 	FVector CurrentDoorLocation = this->GetActorLocation();
 	
-	FVector NewDoorLocation = FVector(Output, CurrentDoorLocation.Y, CurrentDoorLocation.Z);
+	FVector NewDoorLocation = FVector(Output - 2600.f, CurrentDoorLocation.Y, CurrentDoorLocation.Z);
 	StatueMeshComp->SetRelativeLocation(NewDoorLocation);
 }
 

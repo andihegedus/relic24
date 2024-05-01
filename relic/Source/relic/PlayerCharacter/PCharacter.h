@@ -69,6 +69,8 @@ public:
 	//Dialogue
 	void CloseDialogueBox();
 
+	void TilePuzzleSolved();
+
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 
@@ -102,6 +104,8 @@ public:
 	int32 DiveTimerLoopCount;
 
 	int32 DeviceTimerLoopCount;
+
+	int32 MedallionsPlacedCount;
 
 	// Puzzle solution delegates, these delegate events will trigger door(s) opening after puzzles are solved
 	FOnMedallionPlaced OnMedallionPlaced;
@@ -150,6 +154,8 @@ protected:
 
 	// Might move this to Device script
 	void DeviceAbandoned();
+
+	
 
 	// End State
 	void Death();

@@ -1,5 +1,7 @@
 ﻿#include "TileMiniGame.h"
 
+#include <string>
+
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
@@ -72,6 +74,7 @@ ATileMiniGame::ATileMiniGame()
 	this->Tags.Add(MiniGameTag);
 
 	bIsGaming = false;
+	bIsSelected = false;
 }
 
 void ATileMiniGame::BeginPlay()
@@ -92,8 +95,13 @@ void ATileMiniGame::Tick(float DeltaSeconds)
 
 	FKey KeyPressed = EKeys::LeftMouseButton;
 	
+	//int KeyPressedValue = GetInputAxisKeyValue(KeyPressed);
+	//FString PrintKeyPressedValue = FString::FromInt(KeyPressedValue);
 	
-	if (TileInFocus.Num() > 0 && bIsGaming)
+	//UE_LOG(LogTemp, Warning, TEXT(" %s "), *PrintKeyPressedValue); 
+	
+	
+	if (TileInFocus.Num() > 0 && bIsGaming && bIsSelected)
 	{
 		FVector2D MousePosition;
 
@@ -121,16 +129,21 @@ void ATileMiniGame::SelectTile(const FInputActionValue& Value)
 	
 	FHitResult HitResult;
 
+	//const FKey KeyPressed = EKeys::LeftMouseButton;
+	//int KeyPressedValue = GetInputAxisKeyValue(KeyPressed);
+
 	ECollisionChannel CollisionChannel = ECC_Pawn;
 	
 	if (PlayerController)
 	{
 		for (int i = 1; i < Tiles.Num(); i++)
 		{
-			if (PlayerController->GetHitResultUnderCursor(CollisionChannel, false, HitResult))
+			if (PlayerController->GetHitResultUnderCursor(CollisionChannel, false, HitResult) && Value.IsNonZero()) // && (KeyPressedValue == 1)
 			{
 				if (HitResult.Component == Tiles[i])
 				{
+					bIsSelected = true;
+					
 					check(GEngine != nullptr);
 
 					FString CompName = HitResult.Component->GetName();
@@ -141,6 +154,12 @@ void ATileMiniGame::SelectTile(const FInputActionValue& Value)
 					TileInFocus.Empty();
 					TileInFocus.Add(Tiles[i]);
 				}
+			}
+			else
+			{
+				bIsSelected = false;
+				TileInFocus.Empty();
+				return;
 			}
 		}
 	}
@@ -247,11 +266,16 @@ void ATileMiniGame::OnBecomeUnPossessed()
 		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Character not valid.")); 
 
 	}
+
+	OnPuzzleSolved();
 }
 
 void ATileMiniGame::OnPuzzleSolved()
 {
-	
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->TilePuzzleSolved();
+	}
 }
 
 void ATileMiniGame::OnPuzzleAbandoned()
@@ -272,7 +296,7 @@ void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	// TODO: Break Select & Move tiles into separate actions again, use MouseX & Mouse Y to select, use LMB to drag
 	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Triggered, this, &ATileMiniGame::SelectTile);
 	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Ongoing, this, &ATileMiniGame::DragTiles);
-	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Completed, this, &ATileMiniGame::DropTiles);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Canceled, this, &ATileMiniGame::DropTiles);
 	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ATileMiniGame::OnPuzzleAbandoned);
 
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();

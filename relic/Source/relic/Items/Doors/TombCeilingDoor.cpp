@@ -46,7 +46,7 @@ void ATombCeilingDoor::UpdateTimelineComp(float Output)
 {
 	FVector CurrentDoorLocation = this->GetActorLocation();
 	
-	FVector NewDoorLocation = FVector(Output, CurrentDoorLocation.Y, CurrentDoorLocation.Z);
+	FVector NewDoorLocation = FVector(Output - 3360.f, CurrentDoorLocation.Y, CurrentDoorLocation.Z);
 	Door->SetRelativeLocation(NewDoorLocation);
 }
 

@@ -50,7 +50,6 @@ APCharacter::APCharacter()
 	// Timer to start after puzzles are solved
 	DelayAfterSolution = 60.f;
 
-	
 	DiveTimerLoopCount = 0;
 	DeviceTimerLoopCount = 0;
 
@@ -294,7 +293,7 @@ void APCharacter::StartInteract()
 	}
 	if (TagInFocus.Contains("Slot"))
 	{
-		OnMedallionPlaced.Broadcast();
+		
 	}
 }
 
@@ -302,6 +301,11 @@ void APCharacter::DeviceAbandoned()
 {
 	bIsInteracting = false;
 	
+}
+
+void APCharacter::TilePuzzleSolved()
+{
+	OnTilePuzzleSolved.Broadcast();
 }
 
 void APCharacter::CompleteInteract()
@@ -313,17 +317,37 @@ void APCharacter::CompleteInteract()
 		HUD->UpdateInventoryWidget("Pickup");
 
 		InventoryQuantity++;
+
+		ItemsToDestroy[0]->Destroy();
 	}
 	if (TagInFocus.Contains("Slot"))
 	{
-		ItemsToAppear[0]->SetActorHiddenInGame(false);
-		
 		ItemsToAppear[0]->Tags.Empty();
 		
 		if (InventoryQuantity >= 1)
 		{
+			ItemsToAppear[0]->SetActorHiddenInGame(false);
+			
 			InventoryQuantity--;
 		}
+
+		if (MedallionsPlacedCount < 3)
+		{
+			MedallionsPlacedCount++;
+
+			if (MedallionsPlacedCount == 1)
+			{
+				OnMedallionPlaced.Broadcast(); 
+			}
+		}
+		else
+		{
+			if (MedallionsPlacedCount == 3)
+			{
+				OnMedallionPlaced.Broadcast(); 
+			}
+		}
+		
 		
 		HUD->UpdateInventoryWidget("Slot");
 	}

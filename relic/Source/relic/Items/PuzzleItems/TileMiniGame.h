@@ -58,6 +58,8 @@ public:
 
 	bool bIsGaming;
 
+	bool bIsSelected;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APCharacter* PlayerCharacter;
 
