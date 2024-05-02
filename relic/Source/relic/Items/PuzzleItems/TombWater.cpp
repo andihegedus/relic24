@@ -55,7 +55,7 @@ void ATombWater::UpdateTimelineComp(float Output)
 			WaterMeshComp->SetRelativeLocation(LevelTwoWater);
 			break;
 		case 3:
-			LevelThreeWater = FVector(LevelTwoWater.X, LevelTwoWater.Y, Output - 2200.f);
+			LevelThreeWater = FVector(LevelOneWater.X, LevelOneWater.Y, Output - 1650.f);
 			WaterMeshComp->SetRelativeLocation(LevelThreeWater);
 			break;
 		default:

@@ -25,9 +25,9 @@ APCharacter::APCharacter()
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 
 	// Assign SpringArm class variables
-	SpringArmComp->TargetArmLength = 300.f;
-	SpringArmComp->bEnableCameraLag = true;
-	SpringArmComp->CameraLagSpeed = 3.0f;
+	SpringArmComp->TargetArmLength = 0.f;
+	SpringArmComp->bEnableCameraLag = false;
+	//SpringArmComp->CameraLagSpeed = 3.0f;
 	SpringArmComp->bUsePawnControlRotation = true;
 
 	// Take control of the default player
@@ -54,7 +54,7 @@ APCharacter::APCharacter()
 	DeviceTimerLoopCount = 0;
 
 	WaterLevelID = 1;
-
+	
 	// Might not be necessary
 	PlayerTag = "Player";
 	this->Tags.Add(PlayerTag);
@@ -92,16 +92,32 @@ void APCharacter::Idle()
 
 void APCharacter::Move(const FInputActionValue& Value)
 {
-	FVector Input = Value.Get<FInputActionValue::Axis3D>();
+	if (this->GetCharacterMovement()->IsSwimming())
+	{
+		FVector Input = Value.Get<FInputActionValue::Axis3D>();
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(Rotation.Pitch, Rotation.Yaw, 0.f);
 
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(ForwardDirection, Input.Y);
 
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(ForwardDirection, Input.Y);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(RightDirection, Input.X);
+	}
+	else
+	{
+		FVector Input = Value.Get<FInputActionValue::Axis3D>();
 
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(RightDirection, Input.X);
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(ForwardDirection, Input.Y);
+
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(RightDirection, Input.X);
+	}
+	
 }
 
 void APCharacter::Look(const FInputActionValue& Value)

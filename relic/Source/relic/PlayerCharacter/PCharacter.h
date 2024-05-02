@@ -7,6 +7,7 @@
 #include "relic/Items/Doors/TombCeilingDoor.h"
 #include "PCharacter.generated.h"
 
+class APhysicsVolume;
 class ATileMiniGame;
 class ADevice;
 class ATombCeilingDoor;
@@ -138,6 +139,9 @@ public:
 
 	UPROPERTY()
 	APawn* TileGameRef;
+
+	UPROPERTY()
+	APhysicsVolume* PhysicsVolume;
 
 protected:
 	// FUNCTIONS
