@@ -8,11 +8,10 @@ ATombWater::ATombWater()
 {
 	WaterMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WaterMesh"));
 	SetRootComponent(WaterMeshComp);
+	
 	WaterTimelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("WaterTimelineComp"));
 	WaterProxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("WaterProximityTigger"));
 	WaterProxTrigger->AttachToComponent(WaterMeshComp, FAttachmentTransformRules::KeepRelativeTransform);
-
-	
 
 	InitialWaterLocation = this->GetActorLocation();
 }
@@ -56,7 +55,7 @@ void ATombWater::UpdateTimelineComp(float Output)
 			WaterMeshComp->SetRelativeLocation(LevelTwoWater);
 			break;
 		case 3:
-			LevelThreeWater = FVector(LevelTwoWater.X, LevelTwoWater.Y, Output - 2600.f);
+			LevelThreeWater = FVector(LevelTwoWater.X, LevelTwoWater.Y, Output - 2200.f);
 			WaterMeshComp->SetRelativeLocation(LevelThreeWater);
 			break;
 		default:
