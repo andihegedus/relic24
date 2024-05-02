@@ -53,6 +53,8 @@ APCharacter::APCharacter()
 	DiveTimerLoopCount = 0;
 	DeviceTimerLoopCount = 0;
 
+	WaterLevelID = 1;
+
 	// Might not be necessary
 	PlayerTag = "Player";
 	this->Tags.Add(PlayerTag);
@@ -260,7 +262,7 @@ void APCharacter::StartInteract()
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("APCharacter: Reference to Device pawn is not valid.")); 
+				UE_LOG(LogTemp, Warning, TEXT("APCharacter: Reference to Device pawn is not valid."));
 			}
 		}
 		else
@@ -305,7 +307,9 @@ void APCharacter::DeviceAbandoned()
 
 void APCharacter::TilePuzzleSolved()
 {
+	WaterLevelID = 2;
 	OnTilePuzzleSolved.Broadcast();
+	OnCheckpointReached.Broadcast();
 }
 
 void APCharacter::CompleteInteract()
@@ -337,14 +341,17 @@ void APCharacter::CompleteInteract()
 
 			if (MedallionsPlacedCount == 1)
 			{
-				OnMedallionPlaced.Broadcast(); 
+				WaterLevelID = 3;
+				OnMedallionPlaced.Broadcast();
+				OnCheckpointReached.Broadcast();
 			}
 		}
 		else
 		{
 			if (MedallionsPlacedCount == 3)
 			{
-				OnMedallionPlaced.Broadcast(); 
+				OnMedallionPlaced.Broadcast();
+				OnCheckpointReached.Broadcast();
 			}
 		}
 		

@@ -21,6 +21,7 @@ DECLARE_MULTICAST_DELEGATE(FOnTilePuzzleSolved);
 DECLARE_MULTICAST_DELEGATE(FOnDeviceActivated);
 DECLARE_MULTICAST_DELEGATE(FOnDeviceAbandoned);
 DECLARE_MULTICAST_DELEGATE(FOnEnterButtonPressed);
+DECLARE_MULTICAST_DELEGATE(FOnCheckpointReached);
 
 USTRUCT()
 struct FInteractionInfo
@@ -107,6 +108,8 @@ public:
 
 	int32 MedallionsPlacedCount;
 
+	int32 WaterLevelID;
+
 	// Puzzle solution delegates, these delegate events will trigger door(s) opening after puzzles are solved
 	FOnMedallionPlaced OnMedallionPlaced;
 
@@ -118,6 +121,8 @@ public:
 	FOnDeviceAbandoned OnDeviceAbandoned;
 
 	FOnEnterButtonPressed OnEnterButtonPressed;
+
+	FOnCheckpointReached OnCheckpointReached;
 	
 	UPROPERTY()
 	ATombCeilingDoor* TombCeilingDoor;
