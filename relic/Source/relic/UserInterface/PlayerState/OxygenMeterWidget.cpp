@@ -26,7 +26,7 @@ void UOxygenMeterWidget::NativeConstruct()
 	
 	OxygenPercentText->SetText(FText::FromString(FloatToString));
 	WarningText->SetText(FText::FromString("Oxygen Levels Stable"));
-	OxygenProgressBar->SetPercent(0.f);
+	OxygenProgressBar->SetPercent(100.f);
 }
 
 /*

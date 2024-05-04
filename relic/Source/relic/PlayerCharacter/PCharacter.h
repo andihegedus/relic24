@@ -7,6 +7,7 @@
 #include "relic/Items/Doors/TombCeilingDoor.h"
 #include "PCharacter.generated.h"
 
+class USphereComponent;
 class APhysicsVolume;
 class ATileMiniGame;
 class ADevice;
@@ -99,6 +100,12 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Puzzle | MiniGame")
 	TArray<AActor*> PuzzlesToSolve;
 
+	UPROPERTY(VisibleAnywhere, Category="Tomb | Water")
+	TArray<FName> WaterInVision;
+
+	UPROPERTY(VisibleAnywhere, Category="Tomb | Water")
+	TArray<AActor*> BodiesOfWater;
+
 	bool bIsInteracting;
 
 	bool bIsDiving;
@@ -151,7 +158,7 @@ protected:
 	void Idle();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void Dive(const FInputActionValue& Value);
+	//void Dive(const FInputActionValue& Value);
 	void DiveTimer();
 
 	// Interact
@@ -181,6 +188,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	UCameraComponent* CameraComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Body")
+	USphereComponent* PlayerHead;
 
 	FVector LineTraceStart;
 	

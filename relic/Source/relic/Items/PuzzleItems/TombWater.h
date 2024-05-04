@@ -43,6 +43,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 WaterLevelID;
 
+	FName TombWaterTag;
+
 	
 
 	UPROPERTY()

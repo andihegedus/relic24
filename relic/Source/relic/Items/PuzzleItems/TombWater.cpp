@@ -14,6 +14,10 @@ ATombWater::ATombWater()
 	WaterProxTrigger->AttachToComponent(WaterMeshComp, FAttachmentTransformRules::KeepRelativeTransform);
 
 	InitialWaterLocation = this->GetActorLocation();
+
+	TombWaterTag = "TombWater";
+	WaterMeshComp->ComponentTags.Add(TombWaterTag);
+	this->Tags.Add(TombWaterTag);
 }
 
 void ATombWater::BeginPlay()
