@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetStringLibrary.h"
 #include "relic/Items/DialogueTrigger.h"
 #include "relic/Items/PuzzleItems/Device.h"
 #include "relic/Items/PuzzleItems/TileMiniGame.h"
@@ -83,8 +84,35 @@ void APCharacter::Tick(float DeltaSeconds)
 	{
 		CheckForInteractable();
 	}
-	
-	HUD->OxygenMeterWidget->UpdateWidget(OxygenTimerHandle, 100 - DiveTimerLoopCount);
+
+	if (this->GetCharacterMovement()->IsInWater() && !BodiesOfWater.IsEmpty())
+	{
+		FString Diving = UKismetStringLibrary::Conv_BoolToString(PlayerHead->IsOverlappingActor(BodiesOfWater[0]));
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *Diving);
+		
+		if (PlayerHead->IsOverlappingActor(BodiesOfWater[0]))
+		{
+			bIsDiving = true;
+			DiveTimer();
+		}
+		else
+		{
+			bIsDiving = false;
+			DiveTimer();
+			BodiesOfWater.Empty();
+		}
+	}
+	else
+	{
+		bIsDiving = false;
+		DiveTimer();
+		UE_LOG(LogTemp, Warning, TEXT("bisDiving is false."));
+	}
+
+	HUD->OxygenMeterWidget->UpdateWidget(OxygenTimerHandle, 100.f - DiveTimerLoopCount);
+
+	//FString Diving = UKismetStringLibrary::Conv_BoolToString(BodiesOfWater.IsEmpty());
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *Diving);
 }
 
 void APCharacter::Idle()
@@ -93,6 +121,9 @@ void APCharacter::Idle()
 
 void APCharacter::Move(const FInputActionValue& Value)
 {
+	//FString Diving = UKismetStringLibrary::Conv_BoolToString(bIsDiving);
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *Diving);
+	
 	if (this->GetCharacterMovement()->IsSwimming())
 	{
 		FVector Input = Value.Get<FInputActionValue::Axis3D>();
@@ -106,22 +137,6 @@ void APCharacter::Move(const FInputActionValue& Value)
 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(RightDirection, Input.X);
-		
-		if (!BodiesOfWater.IsEmpty())
-		{
-			if (PlayerHead->IsOverlappingActor(BodiesOfWater[0]) && WaterInVision.Contains("TombWater"))
-			{
-				bIsDiving = true;
-			}
-			else
-			{
-				bIsDiving = false;
-			}
-		}
-		else
-		{
-			bIsDiving = false;
-		}
 	}
 	else
 	{
@@ -135,8 +150,6 @@ void APCharacter::Move(const FInputActionValue& Value)
 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(RightDirection, Input.X);
-
-		bIsDiving = false;
 	}
 	
 }
@@ -152,68 +165,32 @@ void APCharacter::Look(const FInputActionValue& Value)
 	SpringArmComp->SetRelativeRotation(Input);
 }
 
-/*
-void APCharacter::Dive(const FInputActionValue& Value)
-{
-	if (this->GetCharacterMovement()->IsSwimming())
-	{
-		FVector InWater;
-		FVector OutOfWater;
-
-		FVector HeadLocation = PlayerHead->GetComponentLocation();
-		FRotator HeadRotation = PlayerHead->GetComponentRotation();
-		//FVector PawnLocation = this->GetActorLocation();
-		FVector WaterLine = this->GetCharacterMovement()->FindWaterLine(InWater, OutOfWater);
-
-		FString H = FString::FromInt(HeadLocation.Z);
-		FString HR = FString::FromInt(HeadRotation.Pitch);
-		FString W = FString::FromInt(OutOfWater.Z);
-		FString W2 = FString::FromInt(OutOfWater.X);
-		FString W3 = FString::FromInt(OutOfWater.Y);
-		
-
-		UE_LOG(LogTemp, Warning, TEXT("Head Location.Z: %s"), *H);
-		UE_LOG(LogTemp, Warning, TEXT("Head Rotation.Pitch: %s"), *HR);
-		
-		//UE_LOG(LogTemp, Warning, TEXT("WaterLine Location.Z: %s"), *W);
-		//UE_LOG(LogTemp, Warning, TEXT("WaterLine Location.X: %s"), *W2);
-		//UE_LOG(LogTemp, Warning, TEXT("WaterLine Location.Y: %s"), *W3);
-
-		if (!BodiesOfWater.IsEmpty())
-		{
-			if (PlayerHead->IsOverlappingActor(BodiesOfWater[0]) && WaterInVision.Contains("TombWater"))
-			{
-				bIsDiving = true;
-			}
-		}
-		else
-		{
-			bIsDiving = false;
-		}
-		
-	}
-}*/
-
 void APCharacter::DiveTimer()
 {
 	if (bIsDiving)
 	{
 		GetWorld()->GetTimerManager().SetTimer(OxygenTimerHandle, this, &APCharacter::DiveTimer, 1.f, true);
-		
-		DiveTimerLoopCount++;
 
-		if (DiveTimerLoopCount >= 100)
+		if (DiveTimerLoopCount < 100.f)
+		{
+			DiveTimerLoopCount += 0.025f;
+		}
+		
+		if (DiveTimerLoopCount >= 100.f)
 		{
 			Death();
+			HUD->OxygenMeterWidget->UpdateWidget(OxygenTimerHandle, 0.f);
+			GetWorld()->GetTimerManager().ClearTimer(OxygenTimerHandle);
+			// End state
 		}
 	}
-	else
+	else if (!bIsDiving)
 	{
-		if (DiveTimerLoopCount > 0)
+		if (DiveTimerLoopCount > 0.f)
 		{
-			DiveTimerLoopCount--;
+			DiveTimerLoopCount -= 0.25;
 
-			if (DiveTimerLoopCount == 0)
+			if (DiveTimerLoopCount == 0.f)
 			{
 				GetWorld()->GetTimerManager().ClearTimer(OxygenTimerHandle);
 			}
@@ -308,13 +285,11 @@ void APCharacter::CheckForInteractable()
 	
 	NoInteractableFound();
 	TagInFocus.Empty();
-	WaterInVision.Empty();
 
 	// TODO: These could potentially be narrowed down to one array, since player should only be able to interact with one item at a time
 	ItemsToDestroy.Empty();
 	ItemsToAppear.Empty();
 	PuzzlesToSolve.Empty();
-	BodiesOfWater.Empty();
 }
 
 void APCharacter::FoundInteractable()
@@ -510,8 +485,6 @@ void APCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Triggered, this, &APCharacter::StartInteract);
 	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Completed, this, &APCharacter::CompleteInteract);
 	
-	//EnhancedInputComponent->BindAction(PlayerBaseController->DiveAction, ETriggerEvent::Completed, this, &APCharacter::Dive);
-
 	EnhancedInputComponent->BindAction(PlayerBaseController->CloseDialogueAction, ETriggerEvent::Completed, this, &APCharacter::CloseDialogueBox);
 
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();

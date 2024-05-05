@@ -110,7 +110,7 @@ public:
 
 	bool bIsDiving;
 	
-	int32 DiveTimerLoopCount;
+	float DiveTimerLoopCount;
 
 	int32 DeviceTimerLoopCount;
 
@@ -158,7 +158,6 @@ protected:
 	void Idle();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	//void Dive(const FInputActionValue& Value);
 	void DiveTimer();
 
 	// Interact
