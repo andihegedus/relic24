@@ -26,20 +26,6 @@ public:
 	virtual void NativeOnInitialized() override;
 
 	virtual void NativeConstruct() override;
-
-	//UFUNCTION()
-	//void UpdateTimelineComp(float Output);
-
-	// PROPERTIES & VARIABLES
-	// -----------------------------
-
-	/*UPROPERTY(EditAnywhere)
-	UCurveFloat* MeterTimelineCurveFloat;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UTimelineComponent* MeterTimelineComp;
-
-	FOnTimelineFloat UpdateFunctionFloat;*/
 	
 	UPROPERTY()
 	APCharacter* PlayerCharacter;
@@ -49,16 +35,9 @@ protected:
 	// -----------------------------
 
 	
-	
-
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 	
-	
-	
-	
-
-
 	// "BindWidget" makes it so the widget won't compile without the specified UProperty present
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category="Interaction Widget | Interactable Info")
 	UHorizontalBox* OxygenMeterBox;
