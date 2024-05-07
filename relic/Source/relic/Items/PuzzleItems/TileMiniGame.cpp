@@ -4,6 +4,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "TilePiece.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/Slider.h"
@@ -25,8 +26,8 @@ ATileMiniGame::ATileMiniGame()
 	TileHolder->SetupAttachment(BoxCollision);
 
 	// TODO: There's probably a cleaner way to do this
-	TileOne = CreateDefaultSubobject<UStaticMeshComponent>("TileOneMesh");
-	Tiles.Add(TileOne);
+	/*TilePiece = CreateDefaultSubobject<ATilePiece>("TilePieceOne");
+	Pieces.Add(TilePiece);
 
 	TileTwo = CreateDefaultSubobject<UStaticMeshComponent>("TileTwoMesh");;
 	Tiles.Add(TileTwo);
@@ -57,7 +58,7 @@ ATileMiniGame::ATileMiniGame()
 		Tiles[i]->SetupAttachment(BoxCollision);
 	}
 
-	TileMovement = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComp");
+	TileMovement = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComp");*/
 
 	// Setup PC Camera components
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -94,12 +95,6 @@ void ATileMiniGame::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	FKey KeyPressed = EKeys::LeftMouseButton;
-	
-	//int KeyPressedValue = GetInputAxisKeyValue(KeyPressed);
-	//FString PrintKeyPressedValue = FString::FromInt(KeyPressedValue);
-	
-	//UE_LOG(LogTemp, Warning, TEXT(" %s "), *PrintKeyPressedValue); 
-	
 	
 	if (TileInFocus.Num() > 0 && bIsGaming && bIsSelected)
 	{
@@ -171,31 +166,10 @@ void ATileMiniGame::SelectTile(const FInputActionValue& Value)
 
 void ATileMiniGame::DragTiles(const FInputActionValue& Value)
 {
-	/*FKey KeyPressed = EKeys::LeftMouseButton;
-	
-	if (TileInFocus.Num() > 0 && bIsGaming)
-	{
-		FVector2D MousePosition;
-
-		// IsMouseButton is looking for input from the button itself, not the mouse axis
-		if (PlayerController->GetGameInstance()->GetGameViewportClient()->GetMousePosition(MousePosition) && KeyPressed.IsMouseButton())
-		{
-			FVector TileLocation = TileInFocus[0]->GetComponentLocation();
-			TileInFocus[0]->SetWorldLocation(FVector(TileLocation.X, MousePosition.X, TileLocation.Z));
-
-			//check(GEngine != nullptr);
-
-			//FString MousePosString = MousePosition.ToString();
-			//UE_LOG(LogTemp, Warning, TEXT(" %s "), *MousePosString); 
-
-			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, MousePosString);
-		}
-	}*/
 }
 
 void ATileMiniGame::DropTiles(const FInputActionValue& Value)
 {
-	
 }
 
 void ATileMiniGame::OnBecomePossessed()

@@ -5,6 +5,7 @@
 #include "InputAction.h"
 #include "TileMiniGame.generated.h"
 
+class ATilePiece;
 class UBoxComponent;
 class ARelicHUD;
 class UFloatingPawnMovement;
@@ -66,6 +67,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APController* PlayerController;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ATilePiece* TilePiece;
+
 	UPROPERTY()
 	ARelicHUD* HUD;
 
@@ -73,12 +77,15 @@ public:
 	class UInputMappingContext* PCMappingContext;
 
 	UPROPERTY()
+	TArray<AActor*> Pieces;
+
+	UPROPERTY()
 	bool bSolvedTilePuzzle;
 
 protected:
 	// FUNCTIONS
 	// -----------------------------
-
+	
 	
 
 	// PROPERTIES & VARIABLES

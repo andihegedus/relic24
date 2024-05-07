@@ -88,7 +88,7 @@ void APCharacter::Tick(float DeltaSeconds)
 	if (this->GetCharacterMovement()->IsInWater() && !BodiesOfWater.IsEmpty())
 	{
 		FString Diving = UKismetStringLibrary::Conv_BoolToString(PlayerHead->IsOverlappingActor(BodiesOfWater[0]));
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *Diving);
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *Diving);
 		
 		if (PlayerHead->IsOverlappingActor(BodiesOfWater[0]))
 		{
@@ -106,7 +106,7 @@ void APCharacter::Tick(float DeltaSeconds)
 	{
 		bIsDiving = false;
 		DiveTimer();
-		UE_LOG(LogTemp, Warning, TEXT("bisDiving is false."));
+		//UE_LOG(LogTemp, Warning, TEXT("bisDiving is false."));
 	}
 
 	HUD->OxygenMeterWidget->UpdateWidget(OxygenTimerHandle, 100.f - DiveTimerLoopCount);

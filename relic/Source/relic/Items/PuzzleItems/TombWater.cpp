@@ -50,7 +50,7 @@ void ATombWater::UpdateTimelineComp(float Output)
 	switch (WaterLevelID)
 	{
 		case 1:
-			UE_LOG(LogTemp, Warning, TEXT("ATombWater: Case 1 Triggered."));
+			//UE_LOG(LogTemp, Warning, TEXT("ATombWater: Case 1 Triggered."));
 			LevelOneWater = FVector(-2660.f, 260.f, Output - 2450.f);
 			WaterMeshComp->SetRelativeLocation(LevelOneWater);
 			break;
@@ -63,7 +63,7 @@ void ATombWater::UpdateTimelineComp(float Output)
 			WaterMeshComp->SetRelativeLocation(LevelThreeWater);
 			break;
 		default:
-			UE_LOG(LogTemp, Warning, TEXT("ATombWater: Default Case Triggered."));
+			//UE_LOG(LogTemp, Warning, TEXT("ATombWater: Default Case Triggered."));
 			break;
 	}
 }
