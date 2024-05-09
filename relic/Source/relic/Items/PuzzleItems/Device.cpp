@@ -35,10 +35,7 @@ ADevice::ADevice()
 	//SpringArmComp->TargetArmLength = 300.f;
 	//SpringArmComp->SetAbsolute(true, true);
 	//
-
 	
-	
-
 	DeviceTag = "Device";
 	DeviceMeshComp->ComponentTags.Add(DeviceTag);
 	this->Tags.Add(DeviceTag);
@@ -58,28 +55,10 @@ void ADevice::BeginPlay()
 	PlayerCharacter = Cast<APCharacter>(GetWorld()->GetGameInstance()->GetFirstLocalPlayerController()->GetPawn());
 
 	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-}
 
-void ADevice::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	OnTimelineEnd.BindDynamic(this, &ADevice::OnPuzzleSolved);
 
-	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
-	APController* PlayerBaseController = CastChecked<APController>(Controller);
-
-	// TODO: Remember that you changed this from MoveAction to DeviceAction to test
-	EnhancedInputComponent->BindAction(PlayerBaseController->DeviceAction, ETriggerEvent::Triggered, this, &ADevice::Move);
-	EnhancedInputComponent->BindAction(PlayerBaseController->DeviceAction, ETriggerEvent::Completed, this, &ADevice::Move);
-	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ADevice::OnPuzzleAbandoned);
-
-	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
-
-	check(LocalPlayer);
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-
-	check(Subsystem);
-	Subsystem->ClearAllMappings();
-	Subsystem->AddMappingContext(PlayerBaseController->PCMappingContext, 0);
+	DeviceTimelineComp->SetTimelinePostUpdateFunc(OnTimelineEnd);
 }
 
 void ADevice::Move(const FInputActionValue& Value)
@@ -89,11 +68,44 @@ void ADevice::Move(const FInputActionValue& Value)
 
 void ADevice::StopMove(const FInputActionValue& Value)
 {
-	DeviceTimelineComp->Stop();
+	DeviceTimelineComp->Reverse();
+}
+
+void ADevice::OnPuzzleSolved()
+{
+	if (DeviceMeshComp->GetComponentRotation() == FRotator(90.f,180.f,180.f))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADevice: Puzzle solved!"));
+
+		DeviceTimelineComp->Stop();
+
+		OnBecomeUnPossessed();
+
+		//TODO: Figure out how to make object shatter, play that animation here before destruction
+
+		this->Destroy();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADevice: Puzzle in progress..."));
+
+		//FRotator Rotation = DeviceMeshComp->GetComponentRotation();
+
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *Rotation.ToString());
+	}
+}
+
+void ADevice::OnPuzzleAbandoned()
+{
+	DeviceTimelineComp->Reverse();
+	
+	OnBecomeUnPossessed();
 }
 
 void ADevice::OnBecomePossessed()
 {
+	DeviceTimelineComp->Stop();
+	
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->GetController()->Possess(this);
@@ -103,7 +115,7 @@ void ADevice::OnBecomePossessed()
 		HUD->HideInteractionWidget();
 
 		FString CheckController = this->GetController()->GetName();
-		UE_LOG(LogTemp, Warning, TEXT(" %s "), *CheckController); 
+		UE_LOG(LogTemp, Warning, TEXT(" %s "), *CheckController);
 
 		PlayerController = Cast<APController>(this->Controller);
 		
@@ -168,16 +180,27 @@ void ADevice::UpdateTimelineComp(float Output)
 	DeviceMeshComp->SetRelativeRotation(NewDeviceRotation);
 }
 
-void ADevice::OnPuzzleSolved()
-{
-	
-}
 
-void ADevice::OnPuzzleAbandoned()
+
+void ADevice::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	DeviceTimelineComp->Reverse();
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+	APController* PlayerBaseController = CastChecked<APController>(Controller);
 	
-	OnBecomeUnPossessed();
+	EnhancedInputComponent->BindAction(PlayerBaseController->DeviceAction, ETriggerEvent::Triggered, this, &ADevice::Move);
+	EnhancedInputComponent->BindAction(PlayerBaseController->DeviceAction, ETriggerEvent::Completed, this, &ADevice::StopMove);
+	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ADevice::OnPuzzleAbandoned);
+
+	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
+
+	check(LocalPlayer);
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+
+	check(Subsystem);
+	Subsystem->ClearAllMappings();
+	Subsystem->AddMappingContext(PlayerBaseController->PCMappingContext, 0);
 }
 
 

@@ -4,6 +4,7 @@
 #include "GameFramework/Pawn.h"
 #include "Pickup.generated.h"
 
+class UBoxComponent;
 class UStaticMeshComponent;
 class APCharacter;
 
@@ -26,6 +27,9 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Category="Pickup | Components")
 	UStaticMeshComponent* PickupMeshComp;
+
+	UPROPERTY(VisibleAnywhere, Category="Pickup | Components")
+	UBoxComponent* BoxCollision;
 
 protected:
 	// FUNCTIONS

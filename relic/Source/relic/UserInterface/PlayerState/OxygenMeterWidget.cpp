@@ -9,9 +9,7 @@
 void UOxygenMeterWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
 	
-
 	PlayerCharacter = Cast<APCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	RoundBarMatInstDynamic = UMaterialInstanceDynamic::Create(RoundBarMaterial, this);
 }

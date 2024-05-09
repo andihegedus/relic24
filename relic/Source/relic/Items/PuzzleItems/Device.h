@@ -76,6 +76,8 @@ public:
 	UPROPERTY()
 	FRotator OriginalRotation;
 
+	FOnTimelineEvent OnTimelineEnd;
+
 protected:
 	// FUNCTIONS
 	// -----------------------------
