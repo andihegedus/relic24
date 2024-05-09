@@ -118,7 +118,7 @@ void ADevice::OnBecomePossessed()
 		}
 		
 		
-		UE_LOG(LogTemp, Warning, TEXT("ADevice: All refs valid. Pawn should be possessed.")); 
+		UE_LOG(LogTemp, Warning, TEXT("ADevice: All refs valid. Pawn should be possessed."));
 	}
 	else
 	{

@@ -16,6 +16,7 @@
 #include "relic/System/RelicHUD.h"
 #include "relic/PlayerCharacter/PController.h"
 #include "relic/UserInterface/PlayerState/OxygenMeterWidget.h"
+#include "UObject/ConstructorHelpers.h"
 
 APCharacter::APCharacter()
 {
@@ -70,7 +71,7 @@ void APCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-
+	
 	// Inventory variables
 	InventoryQuantity = 0;
 	bIsDiving = false;
@@ -110,6 +111,8 @@ void APCharacter::Tick(float DeltaSeconds)
 	}
 
 	HUD->OxygenMeterWidget->UpdateWidget(OxygenTimerHandle, 100.f - DiveTimerLoopCount);
+
+	HUD->OxygenMeterWidget->SetRoundPBPercent((100.f - DiveTimerLoopCount) / 100.f);
 
 	//FString Diving = UKismetStringLibrary::Conv_BoolToString(BodiesOfWater.IsEmpty());
 	//UE_LOG(LogTemp, Warning, TEXT("%s"), *Diving);

@@ -137,8 +137,4 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	UCameraComponent* CameraComp;
-	
-	
-	
-	
 };

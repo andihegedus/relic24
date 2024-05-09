@@ -71,7 +71,7 @@ public:
 	UPROPERTY()
 	UInteractionWidget* InteractionWidget;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	UOxygenMeterWidget* OxygenMeterWidget;
 	
 	UPROPERTY()

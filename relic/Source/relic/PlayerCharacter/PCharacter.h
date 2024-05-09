@@ -78,6 +78,9 @@ public:
 	// -----------------------------
 
 	FName PlayerTag;
+
+	//UPROPERTY()
+	//UBlueprint* OxygenMeterWidgetBP;
 	
 	UPROPERTY(VisibleAnywhere, Category="Character | Inventory")
 	FName CurrentTag;
@@ -150,6 +153,9 @@ public:
 	UPROPERTY()
 	APhysicsVolume* PhysicsVolume;
 
+	UPROPERTY(EditAnywhere)
+	ARelicHUD* HUD;
+
 protected:
 	// FUNCTIONS
 	// -----------------------------
@@ -179,8 +185,8 @@ protected:
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 
-	UPROPERTY()
-	ARelicHUD* HUD;
+	//UPROPERTY()
+	//ARelicHUD* HUD;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	USpringArmComponent* SpringArmComp;

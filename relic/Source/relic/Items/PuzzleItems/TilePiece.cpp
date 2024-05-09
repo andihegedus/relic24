@@ -52,7 +52,7 @@ void ATilePiece::FindAdjacentTile()
 			if (Pieces[i]->ComponentTags.Num() > 0)
 			{
 				FName NeighborTag = Pieces[i]->ComponentTags[0];
-				UE_LOG(LogTemp, Warning, TEXT("%s"), *NeighborTag.ToString()); 
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *NeighborTag.ToString());
 			}
 			else
 			{
