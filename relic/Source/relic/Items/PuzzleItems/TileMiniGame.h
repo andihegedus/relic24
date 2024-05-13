@@ -5,6 +5,7 @@
 #include "InputAction.h"
 #include "TileMiniGame.generated.h"
 
+class USphereComponent;
 class ATilePiece;
 class UBoxComponent;
 class ARelicHUD;
@@ -36,7 +37,7 @@ public:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	void SelectTile(const FInputActionValue& Value);
+	void SelectTile();
 	void DragTiles(const FInputActionValue& Value);
 	void DropTiles(const FInputActionValue& Value);
 	
@@ -82,10 +83,16 @@ public:
 	UPROPERTY()
 	bool bSolvedTilePuzzle;
 
+	int32 SolutionCount;
+
+	UPROPERTY()
+	UMaterial* Highlight;
+
 protected:
 	// FUNCTIONS
 	// -----------------------------
-	
+	UFUNCTION()
+	void CheckTilePlacement();
 	
 
 	// PROPERTIES & VARIABLES
@@ -103,31 +110,40 @@ protected:
 	TArray<UStaticMeshComponent*> Tiles;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* TileOne;
+	TArray<UPrimitiveComponent*> Triggers;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* TileTwo;
+	TArray<UPrimitiveComponent*> OverlappingTiles;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* TileThree;
+	TArray<UPrimitiveComponent*> AllTiles;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* TileFour;
+	USphereComponent* TriggerOne;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* TileFive;
+	USphereComponent* TriggerTwo;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* TileSix;
+	USphereComponent* TriggerThree;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* TileSeven;
+	USphereComponent* TriggerFour;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* TileEight;
+	USphereComponent* TriggerFive;
 
 	UPROPERTY(VisibleAnywhere, Category="Device | Components")
-	UStaticMeshComponent* TileNine;
+	USphereComponent* TriggerSix;
+
+	UPROPERTY(VisibleAnywhere, Category="Device | Components")
+	USphereComponent* TriggerSeven;
+
+	UPROPERTY(VisibleAnywhere, Category="Device | Components")
+	USphereComponent* TriggerEight;
+
+	UPROPERTY(VisibleAnywhere, Category="Device | Components")
+	USphereComponent* TriggerNine;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Device | Components");
 	UFloatingPawnMovement* TileMovement;

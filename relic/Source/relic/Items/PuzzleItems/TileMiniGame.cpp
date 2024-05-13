@@ -1,21 +1,17 @@
 ﻿#include "TileMiniGame.h"
 
-#include <string>
-
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TilePiece.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
-#include "Components/Slider.h"
+#include "Components/SphereComponent.h"
 #include "Engine/LocalPlayer.h"
-#include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "relic/PlayerCharacter/PCharacter.h"
 #include "relic/PlayerCharacter/PController.h"
 #include "relic/System/RelicHUD.h"
-#include "Widgets/Text/SlateEditableTextTypes.h"
 
 ATileMiniGame::ATileMiniGame()
 {
@@ -25,40 +21,51 @@ ATileMiniGame::ATileMiniGame()
 	TileHolder = CreateDefaultSubobject<UStaticMeshComponent>("TileHolder");
 	TileHolder->SetupAttachment(BoxCollision);
 
-	// TODO: There's probably a cleaner way to do this
-	/*TilePiece = CreateDefaultSubobject<ATilePiece>("TilePieceOne");
-	Pieces.Add(TilePiece);
+	// TODO: There's probably a better, less complicated way to do this
+	TriggerOne = CreateDefaultSubobject<USphereComponent>("TriggerOne");
+	TriggerOne->SetupAttachment(BoxCollision);
+	TriggerOne->ComponentTags.Add("TriggerOne");
+	Triggers.Add(TriggerOne);
 
-	TileTwo = CreateDefaultSubobject<UStaticMeshComponent>("TileTwoMesh");;
-	Tiles.Add(TileTwo);
+	TriggerTwo = CreateDefaultSubobject<USphereComponent>("TriggerTwo");
+	TriggerTwo->SetupAttachment(BoxCollision);
+	TriggerTwo->ComponentTags.Add("TriggerTwo");
+	Triggers.Add(TriggerTwo);
 
-	TileThree = CreateDefaultSubobject<UStaticMeshComponent>("TileThreeMesh");
-	Tiles.Add(TileThree);
+	TriggerThree = CreateDefaultSubobject<USphereComponent>("TriggerThree");
+	TriggerThree->SetupAttachment(BoxCollision);
+	TriggerThree->ComponentTags.Add("TriggerThree");
+	Triggers.Add(TriggerThree);
 
-	TileFour = CreateDefaultSubobject<UStaticMeshComponent>("TileFourMesh");
-	Tiles.Add(TileFour);
+	TriggerFour = CreateDefaultSubobject<USphereComponent>("TriggerFour");
+	TriggerFour->SetupAttachment(BoxCollision);
+	TriggerFour->ComponentTags.Add("TriggerFour");
+	Triggers.Add(TriggerFour);
 
-	TileFive = CreateDefaultSubobject<UStaticMeshComponent>("TileFiveMesh");
-	Tiles.Add(TileFive);
+	TriggerFive = CreateDefaultSubobject<USphereComponent>("TriggerFive");
+	TriggerFive->SetupAttachment(BoxCollision);
+	TriggerFive->ComponentTags.Add("TriggerFive");
+	Triggers.Add(TriggerFive);
 
-	TileSix = CreateDefaultSubobject<UStaticMeshComponent>("TileSixMesh");
-	Tiles.Add(TileSix);
+	TriggerSix = CreateDefaultSubobject<USphereComponent>("TriggerSix");
+	TriggerSix->SetupAttachment(BoxCollision);
+	TriggerSix->ComponentTags.Add("TriggerSix");
+	Triggers.Add(TriggerSix);
 
-	TileSeven = CreateDefaultSubobject<UStaticMeshComponent>("TileSevenMesh");
-	Tiles.Add(TileSeven);
+	TriggerSeven = CreateDefaultSubobject<USphereComponent>("TriggerSeven");
+	TriggerSeven->SetupAttachment(BoxCollision);
+	TriggerSeven->ComponentTags.Add("TriggerSeven");
+	Triggers.Add(TriggerSeven);
 
-	TileEight = CreateDefaultSubobject<UStaticMeshComponent>("TileEightMesh");
-	Tiles.Add(TileEight);
+	TriggerEight = CreateDefaultSubobject<USphereComponent>("TriggerEight");
+	TriggerEight->SetupAttachment(BoxCollision);
+	TriggerEight->ComponentTags.Add("TriggerEight");
+	Triggers.Add(TriggerEight);
 
-	TileNine = CreateDefaultSubobject<UStaticMeshComponent>("TileNineMesh");
-	Tiles.Add(TileNine);
-
-	for (int i = 0; i < Tiles.Num(); i++)
-	{
-		Tiles[i]->SetupAttachment(BoxCollision);
-	}
-
-	TileMovement = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComp");*/
+	TriggerNine = CreateDefaultSubobject<USphereComponent>("TriggerNine");
+	TriggerNine->SetupAttachment(BoxCollision);
+	TriggerNine->ComponentTags.Add("TriggerNine");
+	Triggers.Add(TriggerNine);
 
 	// Setup PC Camera components
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -86,15 +93,17 @@ void ATileMiniGame::BeginPlay()
 
 	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
+	SelectTile();
+	
 	// true for testing, until functionality is complete
-	bSolvedTilePuzzle = true;
+	//bSolvedTilePuzzle = true;
 }
 
 void ATileMiniGame::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	FKey KeyPressed = EKeys::LeftMouseButton;
+	/*FKey KeyPressed = EKeys::LeftMouseButton;
 	
 	if (TileInFocus.Num() > 0 && bIsGaming && bIsSelected)
 	{
@@ -115,53 +124,46 @@ void ATileMiniGame::Tick(float DeltaSeconds)
 
 			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, MousePosString);
 		}
-	}
+	}*/
 }
 
-void ATileMiniGame::SelectTile(const FInputActionValue& Value)
+void ATileMiniGame::SelectTile()
 {
 	PlayerController = Cast<APController>(this->GetController());
-	
-	FHitResult HitResult;
 
-	//const FKey KeyPressed = EKeys::LeftMouseButton;
-	//int KeyPressedValue = GetInputAxisKeyValue(KeyPressed);
-
-	ECollisionChannel CollisionChannel = ECC_Pawn;
-	
-	if (PlayerController)
+	if (Triggers.Num() > 0)
 	{
-		for (int i = 1; i < Tiles.Num(); i++)
+		for (int i = 1; i < Triggers.Num(); i++)
 		{
-			if (PlayerController->GetHitResultUnderCursor(CollisionChannel, false, HitResult) && Value.IsNonZero()) // && (KeyPressedValue == 1)
+			Triggers[i]->GetOverlappingComponents(AllTiles);
+
+			if (AllTiles.Num() > 0)
 			{
-				if (HitResult.Component == Tiles[i])
+				TilePiece = Cast<ATilePiece>(AllTiles[0]->GetOwner());
+
+				FName TileTag = AllTiles[0]->ComponentTags[0];
+
+				if (TilePiece)
 				{
-					bIsSelected = true;
-					
-					check(GEngine != nullptr);
-
-					FString CompName = HitResult.Component->GetName();
-					//UE_LOG(LogTemp, Warning, TEXT(" %s "), *CompName); 
-
-					GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, CompName);
-
-					TileInFocus.Empty();
-					TileInFocus.Add(Tiles[i]);
+					//TilePiece->OnBecomePossessed();
+					UE_LOG(LogTemp, Warning, TEXT("ATileGame: Tile %s found. Tile possessed."), *TileTag.ToString() ); 
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("ATileGame: Cast not valid. Can't possess tile.")); 
 				}
 			}
 			else
 			{
-				bIsSelected = false;
-				TileInFocus.Empty();
-				return;
+				UE_LOG(LogTemp, Warning, TEXT("ATileGame: No tiles found.")); 
 			}
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Contoller not valid."));
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame, BeginPlay: No triggers found.")); 
 	}
+	
 }
 
 void ATileMiniGame::DragTiles(const FInputActionValue& Value)
@@ -170,6 +172,7 @@ void ATileMiniGame::DragTiles(const FInputActionValue& Value)
 
 void ATileMiniGame::DropTiles(const FInputActionValue& Value)
 {
+	CheckTilePlacement();
 }
 
 void ATileMiniGame::OnBecomePossessed()
@@ -198,12 +201,11 @@ void ATileMiniGame::OnBecomePossessed()
 			UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Contoller not valid."));
 		}
 		
-		UE_LOG(LogTemp, Warning, TEXT("ATileGame: All refs valid. Pawn should be possessed.")); 
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: All refs valid. Pawn should be possessed."));
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Character not valid.")); 
-
 	}
 }
 
@@ -224,10 +226,10 @@ void ATileMiniGame::OnBecomeUnPossessed()
 			PlayerController->Possess(PlayerCharacter);
 			PlayerController->SetShowMouseCursor(false);
 
-			if (bSolvedTilePuzzle)
+			/*if (bSolvedTilePuzzle)
 			{
 				PlayerCharacter->OnTilePuzzleSolved.Broadcast();
-			}
+			}*/
 		}
 		else
 		{
@@ -241,7 +243,67 @@ void ATileMiniGame::OnBecomeUnPossessed()
 
 	}
 
-	OnPuzzleSolved();
+	//OnPuzzleSolved();
+}
+
+
+void ATileMiniGame::CheckTilePlacement()
+{
+	if (Triggers.Num() > 0)
+	{
+		for (int i = 1; i < Triggers.Num(); i++)
+		{
+			Triggers[i]->GetOverlappingComponents(OverlappingTiles);
+
+			if (OverlappingTiles.Num() > 0)
+			{
+				for (int n = 1; n < OverlappingTiles.Num(); n++)
+				{
+					if (OverlappingTiles[n]->ComponentTags.Num() > 0)
+					{
+						FName NeighborTag = OverlappingTiles[n]->ComponentTags[0];
+						//UE_LOG(LogTemp, Warning, TEXT("ATileGame, TriggerOne: Adjacent tiles present - %s ."), *NeighborTag.ToString());
+
+						if (Triggers[i]->ComponentTags.Contains("TriggerOne") && NeighborTag == "One" ||
+							Triggers[i]->ComponentTags.Contains("TriggerTwo") && NeighborTag == "Two" ||
+							Triggers[i]->ComponentTags.Contains("TriggerThree") && NeighborTag == "Three" ||
+							Triggers[i]->ComponentTags.Contains("TriggerFour") && NeighborTag == "Four" ||
+							Triggers[i]->ComponentTags.Contains("TriggerFive") && NeighborTag == "Five" ||
+							Triggers[i]->ComponentTags.Contains("TriggerSix") && NeighborTag == "Six" ||
+							Triggers[i]->ComponentTags.Contains("TriggerSeven") && NeighborTag == "Seven" ||
+							Triggers[i]->ComponentTags.Contains("TriggerEight") && NeighborTag == "Eight" ||
+							Triggers[i]->ComponentTags.Contains("TriggerNine") && NeighborTag == "Nine")
+						{
+							SolutionCount++;
+						}
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("ATileGame: Number identifier tag not found.")); 
+					}
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ATileGame: No adjacent tiles found.")); 
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: No triggers found.")); 
+	}
+
+	if (SolutionCount == 9)
+	{
+		OnPuzzleSolved();
+		OnBecomeUnPossessed();
+	}
+	else if (SolutionCount < 9)
+	{
+		SolutionCount = 0;
+		OverlappingTiles.Empty();
+	}
 }
 
 void ATileMiniGame::OnPuzzleSolved()
