@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "InputAction.h"
 #include "TilePiece.generated.h"
 
 class USphereComponent;
@@ -16,6 +17,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UMaterial;
 
 UCLASS()
 class ATilePiece : public APawn
@@ -27,12 +29,22 @@ public:
 	// -----------------------------
 	
 	ATilePiece();
+	
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
+	void MoveTile(const FInputActionValue& Value);
+	
 	UFUNCTION()
 	void OnBecomePossessed();
 
 	UFUNCTION()
 	void OnBecomeUnPossessed();
+
+	UFUNCTION()
+	void HighlightTile();
+
+	UFUNCTION()
+	void HideHighlight();
 	
 
 	// PROPERTIES & VARIABLES
@@ -61,19 +73,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ATilePiece* TilePiece;
 
-	/*UPROPERTY(VisibleAnywhere, Category="TilePiece | Components")
-	USphereComponent* SphereCollisionTop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterial* HighlightMaterial;
 
-	UPROPERTY(VisibleAnywhere, Category="TilePiece | Components")
-	USphereComponent* SphereCollisionBottom;
-
-	UPROPERTY(VisibleAnywhere, Category="TilePiece | Components")
-	USphereComponent* SphereCollisionLeft;
-
-	UPROPERTY(VisibleAnywhere, Category="TilePiece | Components")
-	USphereComponent* SphereCollisionRight;*/
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterial* TransparentMaterial;
+	
 	bool bAllNeighborsFound;
+
+	int32 TileID;
+	
 
 protected:
 	// FUNCTIONS
@@ -83,13 +92,7 @@ protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION()
-	void FindAdjacentTile();
-
-	//UFUNCTION()
-	//void AllNeighborsFound();
 	
-
 	// PROPERTIES & VARIABLES
 	// -----------------------------
 	

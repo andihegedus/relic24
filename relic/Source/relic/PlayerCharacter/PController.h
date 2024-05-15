@@ -30,6 +30,18 @@ public:
 	class UInputAction* MoveAction;
 
 	UPROPERTY()
+	class UInputAction* SelectUpAction;
+
+	UPROPERTY()
+	class UInputAction* SelectDownAction;
+
+	UPROPERTY()
+	class UInputAction* SelectLeftAction;
+
+	UPROPERTY()
+	class UInputAction* SelectRightAction;
+
+	UPROPERTY()
 	class UInputAction* LookAction;
 
 	UPROPERTY()
@@ -52,12 +64,6 @@ public:
 
 	UPROPERTY()
 	class UInputAction* DeviceAction;
-
-	UPROPERTY()
-	class UInputAction* TileGameAction;
-
-	UPROPERTY()
-	class UInputAction* SelectTileAction;
 
 	UPROPERTY()
 	class UInputAction* EscapeAction;

@@ -93,7 +93,7 @@ void ATileMiniGame::BeginPlay()
 
 	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
-	SelectTile();
+	TileSelectNum = 1;
 	
 	// true for testing, until functionality is complete
 	//bSolvedTilePuzzle = true;
@@ -102,77 +102,98 @@ void ATileMiniGame::BeginPlay()
 void ATileMiniGame::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	/*FKey KeyPressed = EKeys::LeftMouseButton;
-	
-	if (TileInFocus.Num() > 0 && bIsGaming && bIsSelected)
-	{
-		FVector2D MousePosition;
-
-		// IsMouseButton is looking for input from the button itself, not the mouse axis
-		if (PlayerController->GetGameInstance()->GetGameViewportClient()->GetMousePosition(MousePosition)) // && KeyPressed.IsMouseButton()
-		{
-			FVector TileLocation = TileInFocus[0]->GetComponentLocation();
-
-			// There has to be a better way to convert 2D space to 3D world space, but I haven't found it yet - I don't recommend the method below
-			TileInFocus[0]->SetRelativeLocation(FVector(TileLocation.X + 3535, -MousePosition.X + 755, -MousePosition.Y + 250));
-
-			//check(GEngine != nullptr);
-
-			//FString MousePosString = MousePosition.ToString();
-			//UE_LOG(LogTemp, Warning, TEXT(" %s "), *MousePosString); 
-
-			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, MousePosString);
-		}
-	}*/
 }
 
-void ATileMiniGame::SelectTile()
+//TODO: This needs to be edited to only move on the Z and Y axes
+void ATileMiniGame::SelectTile(const FInputActionValue& Value)
 {
-	PlayerController = Cast<APController>(this->GetController());
+	FVector Input = Value.Get<FInputActionValue::Axis3D>();
 
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	AddMovementInput(ForwardDirection, Input.Y);
+
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	AddMovementInput(RightDirection, Input.X);
+}
+
+void ATileMiniGame::UpdateSelection()
+{
 	if (Triggers.Num() > 0)
 	{
 		for (int i = 1; i < Triggers.Num(); i++)
 		{
-			Triggers[i]->GetOverlappingComponents(AllTiles);
-
-			if (AllTiles.Num() > 0)
-			{
-				TilePiece = Cast<ATilePiece>(AllTiles[0]->GetOwner());
-
-				FName TileTag = AllTiles[0]->ComponentTags[0];
-
-				if (TilePiece)
-				{
-					//TilePiece->OnBecomePossessed();
-					UE_LOG(LogTemp, Warning, TEXT("ATileGame: Tile %s found. Tile possessed."), *TileTag.ToString() ); 
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("ATileGame: Cast not valid. Can't possess tile.")); 
-				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("ATileGame: No tiles found.")); 
-			}
+			if (Triggers[i]->ComponentTags.Contains("TriggerOne") && TileSelectNum == 1 ||
+				Triggers[i]->ComponentTags.Contains("TriggerTwo") && TileSelectNum == 2 ||
+				Triggers[i]->ComponentTags.Contains("TriggerThree") && TileSelectNum == 3 ||
+				Triggers[i]->ComponentTags.Contains("TriggerFour") && TileSelectNum == 4 ||
+				Triggers[i]->ComponentTags.Contains("TriggerFive") && TileSelectNum == 5 ||
+				Triggers[i]->ComponentTags.Contains("TriggerSix") && TileSelectNum == 6 ||
+				Triggers[i]->ComponentTags.Contains("TriggerSeven") && TileSelectNum == 7 ||
+				Triggers[i]->ComponentTags.Contains("TriggerEight") && TileSelectNum == 8 ||
+				Triggers[i]->ComponentTags.Contains("TriggerNine") && TileSelectNum == 9)
+			{}
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ATileGame, BeginPlay: No triggers found.")); 
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: No triggers found.")); 
 	}
+}
+
+void ATileMiniGame::PossessTile(const FInputActionValue& Value)
+{
 	
 }
 
-void ATileMiniGame::DragTiles(const FInputActionValue& Value)
+void ATileMiniGame::MoveSelectionUp(const FInputActionValue& Value)
 {
+	if (TileSelectNum > 3)
+	{
+		TileSelectNum -= 3;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Can't move up."));
+	}
 }
 
-void ATileMiniGame::DropTiles(const FInputActionValue& Value)
+void ATileMiniGame::MoveSelectionDown(const FInputActionValue& Value)
 {
-	CheckTilePlacement();
+	if (TileSelectNum <= 6)
+	{
+		TileSelectNum += 3;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Can't move down."));
+	}
+}
+
+void ATileMiniGame::MoveSelectionLeft(const FInputActionValue& Value)
+{
+	if (TileSelectNum > 1)
+	{
+		TileSelectNum--;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Can't move right."));
+	}
+}
+
+void ATileMiniGame::MoveSelectionRight(const FInputActionValue& Value)
+{
+	if (TileSelectNum < 9)
+	{
+		TileSelectNum++;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Can't move left."));
+	}
 }
 
 void ATileMiniGame::OnBecomePossessed()
@@ -207,6 +228,8 @@ void ATileMiniGame::OnBecomePossessed()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Character not valid.")); 
 	}
+	
+	CheckTilePlacement();
 }
 
 void ATileMiniGame::OnBecomeUnPossessed()
@@ -234,16 +257,12 @@ void ATileMiniGame::OnBecomeUnPossessed()
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Contoller not valid."));
-
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Character not valid.")); 
-
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Character not valid."));
 	}
-
-	//OnPuzzleSolved();
 }
 
 
@@ -255,37 +274,30 @@ void ATileMiniGame::CheckTilePlacement()
 		{
 			Triggers[i]->GetOverlappingComponents(OverlappingTiles);
 
-			if (OverlappingTiles.Num() > 0)
+			for (int n = 1; n < OverlappingTiles.Num(); n++)
 			{
-				for (int n = 1; n < OverlappingTiles.Num(); n++)
+				if (OverlappingTiles[n]->ComponentTags.Num() > 0)
 				{
-					if (OverlappingTiles[n]->ComponentTags.Num() > 0)
-					{
-						FName NeighborTag = OverlappingTiles[n]->ComponentTags[0];
-						//UE_LOG(LogTemp, Warning, TEXT("ATileGame, TriggerOne: Adjacent tiles present - %s ."), *NeighborTag.ToString());
+					FName OverlapTag = OverlappingTiles[n]->ComponentTags[0];
+					//UE_LOG(LogTemp, Warning, TEXT("ATileGame, TriggerOne: Adjacent tiles present - %s ."), *NeighborTag.ToString());
 
-						if (Triggers[i]->ComponentTags.Contains("TriggerOne") && NeighborTag == "One" ||
-							Triggers[i]->ComponentTags.Contains("TriggerTwo") && NeighborTag == "Two" ||
-							Triggers[i]->ComponentTags.Contains("TriggerThree") && NeighborTag == "Three" ||
-							Triggers[i]->ComponentTags.Contains("TriggerFour") && NeighborTag == "Four" ||
-							Triggers[i]->ComponentTags.Contains("TriggerFive") && NeighborTag == "Five" ||
-							Triggers[i]->ComponentTags.Contains("TriggerSix") && NeighborTag == "Six" ||
-							Triggers[i]->ComponentTags.Contains("TriggerSeven") && NeighborTag == "Seven" ||
-							Triggers[i]->ComponentTags.Contains("TriggerEight") && NeighborTag == "Eight" ||
-							Triggers[i]->ComponentTags.Contains("TriggerNine") && NeighborTag == "Nine")
-						{
-							SolutionCount++;
-						}
-					}
-					else
+					if (Triggers[i]->ComponentTags.Contains("TriggerOne") && OverlapTag == "TileOne" ||
+						Triggers[i]->ComponentTags.Contains("TriggerTwo") && OverlapTag == "TileTwo" ||
+						Triggers[i]->ComponentTags.Contains("TriggerThree") && OverlapTag == "TileThree" ||
+						Triggers[i]->ComponentTags.Contains("TriggerFour") && OverlapTag == "TileFour" ||
+						Triggers[i]->ComponentTags.Contains("TriggerFive") && OverlapTag == "TileFive" ||
+						Triggers[i]->ComponentTags.Contains("TriggerSix") && OverlapTag == "TileSix" ||
+						Triggers[i]->ComponentTags.Contains("TriggerSeven") && OverlapTag == "TileSeven" ||
+						Triggers[i]->ComponentTags.Contains("TriggerEight") && OverlapTag == "TileEight" ||
+						Triggers[i]->ComponentTags.Contains("TriggerNine") && OverlapTag == "TileNine")
 					{
-						UE_LOG(LogTemp, Warning, TEXT("ATileGame: Number identifier tag not found.")); 
+						SolutionCount++;
 					}
 				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("ATileGame: No adjacent tiles found.")); 
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("ATileGame: Number identifier tag not found.")); 
+				}
 			}
 		}
 	}
@@ -314,6 +326,7 @@ void ATileMiniGame::OnPuzzleSolved()
 	}
 }
 
+
 void ATileMiniGame::OnPuzzleAbandoned()
 {
 	// Something to save the puzzle state here
@@ -328,13 +341,11 @@ void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	APController* PlayerBaseController = CastChecked<APController>(Controller);
-
-	// TODO: Break Select & Move tiles into separate actions again, use MouseX & Mouse Y to select, use LMB to drag
-	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Triggered, this, &ATileMiniGame::SelectTile);
-	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Ongoing, this, &ATileMiniGame::DragTiles);
-	EnhancedInputComponent->BindAction(PlayerBaseController->TileGameAction, ETriggerEvent::Canceled, this, &ATileMiniGame::DropTiles);
+	
+	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Triggered, this, &ATileMiniGame::PossessTile);
 	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ATileMiniGame::OnPuzzleAbandoned);
-
+	EnhancedInputComponent->BindAction(PlayerBaseController->MoveAction, ETriggerEvent::Completed, this, &ATileMiniGame::SelectTile);
+	
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
 
 	check(LocalPlayer);

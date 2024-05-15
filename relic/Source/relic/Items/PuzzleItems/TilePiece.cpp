@@ -1,6 +1,10 @@
 ﻿#include "TilePiece.h"
 
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "TileMiniGame.h"
 #include "Components/SphereComponent.h"
+#include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 #include "relic/PlayerCharacter/PCharacter.h"
 #include "relic/PlayerCharacter/PController.h"
@@ -15,6 +19,20 @@ ATilePiece::ATilePiece()
 	SphereCollision->SetupAttachment(TilePieceComp);
 }
 
+void ATilePiece::BeginPlay()
+{
+	Super::BeginPlay();
+
+	PlayerCharacter = Cast<APCharacter>(GetWorld()->GetGameInstance()->GetFirstLocalPlayerController()->GetPawn());
+
+	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+}
+
+void ATilePiece::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+}
+
 void ATilePiece::OnBecomePossessed()
 {
 	if (PlayerCharacter)
@@ -24,7 +42,7 @@ void ATilePiece::OnBecomePossessed()
 		PlayerCharacter->SetActorHiddenInGame(true);
 
 		FString CheckController = this->GetController()->GetName();
-		UE_LOG(LogTemp, Warning, TEXT(" %s "), *CheckController); 
+		UE_LOG(LogTemp, Warning, TEXT(" %s "), *CheckController);
 
 		PlayerController = Cast<APController>(this->Controller);
 		
@@ -32,7 +50,6 @@ void ATilePiece::OnBecomePossessed()
 		{
 			// Not sure if this is still necessary, but it makes me feel safe
 			PCMappingContext = {PlayerController->PCMappingContext};
-			//PlayerController->SetShowMouseCursor(true);
 		}
 		else
 		{
@@ -53,76 +70,58 @@ void ATilePiece::OnBecomeUnPossessed()
 	if (PlayerCharacter)
 	{
 		GetController()->UnPossess();
-		//PlayerCharacter->AutoPossessPlayer = EAutoReceiveInput::Player0;
-		//PlayerCharacter->SetActorHiddenInGame(false);
-
-		PlayerController = Cast<APController>(GetWorld()->GetGameInstance()->GetPrimaryPlayerController());
-		
-		if (PlayerController)
-		{
-			//PlayerController->Possess(PlayerCharacter);
-			//PlayerController->SetShowMouseCursor(false);
-
-			/*if (bSolvedTilePuzzle)
-			{
-				PlayerCharacter->OnTilePuzzleSolved.Broadcast();
-			}*/
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Ref to Player Contoller not valid."));
-
-		}
+		PlayerCharacter->TileGame->OnBecomePossessed();
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Ref to Player Character not valid.")); 
-
 	}
 }
 
-void ATilePiece::BeginPlay()
+//TODO: This needs to be edited to only move on the Z and Y axes
+void ATilePiece::MoveTile(const FInputActionValue& Value)
 {
-	Super::BeginPlay();
+	FVector Input = Value.Get<FInputActionValue::Axis3D>();
 
-	PlayerCharacter = Cast<APCharacter>(GetWorld()->GetGameInstance()->GetFirstLocalPlayerController()->GetPawn());
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
 
-	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	AddMovementInput(ForwardDirection, Input.Y);
 
-	FindAdjacentTile();
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	AddMovementInput(RightDirection, Input.X);
 }
 
-void ATilePiece::Tick(float DeltaSeconds)
+//TODO: Learn more about overlay materials, make these translucent instead of opaque - they are completely hiding the tiles
+void ATilePiece::HighlightTile()
 {
-	Super::Tick(DeltaSeconds);
-
-	//TODO: move this to contingent on bool from TileMiniGame start
-	//FindAdjacentTile();
+	TilePieceComp->SetOverlayMaterial(HighlightMaterial);
 }
 
-void ATilePiece::FindAdjacentTile()
+void ATilePiece::HideHighlight()
 {
-	//SphereCollision->GetOverlappingComponents(Neighbors);
+	TilePieceComp->SetOverlayMaterial(TransparentMaterial);
+}
 
-	this->GetOverlappingComponents(Neighbors);
+void ATilePiece::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	this->GetOverlappingActors(Actors);
+	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+	APController* PlayerBaseController = CastChecked<APController>(Controller);
 	
-	for (int i = 1; i < Neighbors.Num(); i++)
-	{
-		if (Neighbors[i]->ComponentTags.Num() > 0)
-		{
-			FName NeighborTag = Neighbors[i]->ComponentTags[0];
-			UE_LOG(LogTemp, Warning, TEXT("ATilePiece: I am the tile neighbor, %s."), *NeighborTag.ToString());
-			
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ATilePiece: No component tags found.")); 
-		}
-	}
-	if (Neighbors.Num() == 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ATilePiece: No neighbors found.")); 
-	}
+	EnhancedInputComponent->BindAction(PlayerBaseController->MoveAction, ETriggerEvent::Completed, this, &ATilePiece::MoveTile);
+	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Completed, this, &ATilePiece::OnBecomeUnPossessed);
+	
+	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
+
+	check(LocalPlayer);
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+
+	check(Subsystem);
+	Subsystem->ClearAllMappings();
+	Subsystem->AddMappingContext(PlayerBaseController->PCMappingContext, 0);
 }
+
+

@@ -16,7 +16,6 @@
 #include "relic/System/RelicHUD.h"
 #include "relic/PlayerCharacter/PController.h"
 #include "relic/UserInterface/PlayerState/OxygenMeterWidget.h"
-#include "UObject/ConstructorHelpers.h"
 
 APCharacter::APCharacter()
 {
