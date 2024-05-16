@@ -76,6 +76,7 @@ ATileMiniGame::ATileMiniGame()
 
 	// Assign SpringArm class variables
 	SpringArmComp->TargetArmLength = 300.f;
+	//CameraComp->SetAutoActivate(true);
 
 	MiniGameTag = "TileGame";
 	BoxCollision->ComponentTags.Add(MiniGameTag);
@@ -94,9 +95,6 @@ void ATileMiniGame::BeginPlay()
 	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
 	TileSelectNum = 1;
-	
-	// true for testing, until functionality is complete
-	//bSolvedTilePuzzle = true;
 }
 
 void ATileMiniGame::Tick(float DeltaSeconds)
@@ -104,21 +102,99 @@ void ATileMiniGame::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
-//TODO: This needs to be edited to only move on the Z and Y axes
-void ATileMiniGame::SelectTile(const FInputActionValue& Value)
+void ATileMiniGame::SelectTile()
 {
-	FVector Input = Value.Get<FInputActionValue::Axis3D>();
+	if (Triggers.Num() > 0)
+	{
+		for (int i = 1; i < Triggers.Num(); i++)
+		{
+			Triggers[i]->SetHiddenInGame(true);
+		}
+	}
 
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+	TriggerOne->SetHiddenInGame(true);
+	Actors.Empty();
+	
+	switch (TileSelectNum)
+	{
+	case 1:
+		TriggerOne->SetHiddenInGame(false);
+		TriggerOne->ShapeColor = FColor::Red;
 
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(ForwardDirection, Input.Y);
+		GetOverlappingTiles(TriggerOne);
+		
+		break;
+		
+	case 2:
+		TriggerTwo->SetHiddenInGame(false);
+		TriggerTwo->ShapeColor = FColor::Red;
 
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(RightDirection, Input.X);
+		GetOverlappingTiles(TriggerTwo);
+		
+		break;
+		
+	case 3:
+		TriggerThree->SetHiddenInGame(false);
+		TriggerThree->ShapeColor = FColor::Red;
+		
+		GetOverlappingTiles(TriggerThree);
+		
+		break;
+		
+	case 4:
+		TriggerFour->SetHiddenInGame(false);
+		TriggerFour->ShapeColor = FColor::Red;
+		
+		GetOverlappingTiles(TriggerFour);
+		
+		break;
+		
+	case 5:
+		TriggerFive->SetHiddenInGame(false);
+		TriggerFive->ShapeColor = FColor::Red;
+		
+		GetOverlappingTiles(TriggerFive);
+		
+		break;
+		
+	case 6:
+		TriggerSix->SetHiddenInGame(false);
+		TriggerSix->ShapeColor = FColor::Red;
+		
+		GetOverlappingTiles(TriggerSix);
+		
+		break;
+		
+	case 7:
+		TriggerSeven->SetHiddenInGame(false);
+		TriggerSeven->ShapeColor = FColor::Red;
+		
+		GetOverlappingTiles(TriggerSeven);
+		
+		break;
+		
+	case 8:
+		TriggerEight->SetHiddenInGame(false);
+		TriggerEight->ShapeColor = FColor::Red;
+		
+		GetOverlappingTiles(TriggerEight);
+		
+		break;
+		
+	case 9:
+		TriggerNine->SetHiddenInGame(false);
+		TriggerNine->ShapeColor = FColor::Red;
+		
+		GetOverlappingTiles(TriggerNine);
+		
+		break;
+		
+	default:
+		break;
+	}
 }
 
+/*
 void ATileMiniGame::UpdateSelection()
 {
 	if (Triggers.Num() > 0)
@@ -141,11 +217,18 @@ void ATileMiniGame::UpdateSelection()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ATileGame: No triggers found.")); 
 	}
-}
+}*/
 
 void ATileMiniGame::PossessTile(const FInputActionValue& Value)
 {
-	
+	if (TilePiece)
+	{
+		//TilePiece->OnBecomePossessed();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Can't posess tile. No valid ref to ATilePiece."));
+	}
 }
 
 void ATileMiniGame::MoveSelectionUp(const FInputActionValue& Value)
@@ -153,6 +236,7 @@ void ATileMiniGame::MoveSelectionUp(const FInputActionValue& Value)
 	if (TileSelectNum > 3)
 	{
 		TileSelectNum -= 3;
+		SelectTile();
 	}
 	else
 	{
@@ -165,6 +249,7 @@ void ATileMiniGame::MoveSelectionDown(const FInputActionValue& Value)
 	if (TileSelectNum <= 6)
 	{
 		TileSelectNum += 3;
+		SelectTile();
 	}
 	else
 	{
@@ -177,6 +262,7 @@ void ATileMiniGame::MoveSelectionLeft(const FInputActionValue& Value)
 	if (TileSelectNum > 1)
 	{
 		TileSelectNum--;
+		SelectTile();
 	}
 	else
 	{
@@ -189,6 +275,7 @@ void ATileMiniGame::MoveSelectionRight(const FInputActionValue& Value)
 	if (TileSelectNum < 9)
 	{
 		TileSelectNum++;
+		SelectTile();
 	}
 	else
 	{
@@ -206,6 +293,8 @@ void ATileMiniGame::OnBecomePossessed()
 		AutoPossessPlayer = EAutoReceiveInput::Player0;
 		PlayerCharacter->SetActorHiddenInGame(true);
 
+		//TODO: figure out how to make camera view change to this pawns camera consistently
+
 		FString CheckController = this->GetController()->GetName();
 		UE_LOG(LogTemp, Warning, TEXT(" %s "), *CheckController); 
 
@@ -215,7 +304,7 @@ void ATileMiniGame::OnBecomePossessed()
 		{
 			// Not sure if this is still necessary, but it makes me feel safe
 			PCMappingContext = {PlayerController->PCMappingContext};
-			PlayerController->SetShowMouseCursor(true);
+			PlayerController->SetViewTarget(this);
 		}
 		else
 		{
@@ -228,8 +317,11 @@ void ATileMiniGame::OnBecomePossessed()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Character not valid.")); 
 	}
-	
-	CheckTilePlacement();
+
+	SelectTile();
+
+	// Currently crashes game:
+	//CheckTilePlacement();
 }
 
 void ATileMiniGame::OnBecomeUnPossessed()
@@ -247,7 +339,7 @@ void ATileMiniGame::OnBecomeUnPossessed()
 		if (PlayerController)
 		{
 			PlayerController->Possess(PlayerCharacter);
-			PlayerController->SetShowMouseCursor(false);
+			//PlayerController->SetShowMouseCursor(false);
 
 			/*if (bSolvedTilePuzzle)
 			{
@@ -326,10 +418,49 @@ void ATileMiniGame::OnPuzzleSolved()
 	}
 }
 
+void ATileMiniGame::GetOverlappingTiles(UPrimitiveComponent* Trigger)
+{
+	Trigger->GetOverlappingActors(Actors);
+
+	FString CompName = Trigger->GetName();
+		
+	for (int o = 1; o < Actors.Num(); o++)
+	{
+		if (Actors[o]->GetClass() != this->GetClass())
+		{
+			TilePiece = Cast<ATilePiece>(Actors[o]);
+
+			if (TilePiece)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ATileGame: %s , ATilePiece cast succeeded!."), *CompName);
+				TilePiece->HighlightTile();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ATileGame: %s , ATilePiece cast failed."), *CompName);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ATileGame: %s , ATilePiece no matching actors of class found."), *CompName);
+		}
+	}
+}
+
 
 void ATileMiniGame::OnPuzzleAbandoned()
 {
-	// Something to save the puzzle state here
+	//TODO: Something to save the puzzle state here
+
+	if (Triggers.Num() > 0)
+	{
+		for (int i = 1; i < Triggers.Num(); i++)
+		{
+			Triggers[i]->SetHiddenInGame(true);
+		}
+	}
+
+	TriggerOne->SetHiddenInGame(true);
 	
 	OnBecomeUnPossessed();
 }
@@ -344,7 +475,11 @@ void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	
 	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Triggered, this, &ATileMiniGame::PossessTile);
 	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ATileMiniGame::OnPuzzleAbandoned);
-	EnhancedInputComponent->BindAction(PlayerBaseController->MoveAction, ETriggerEvent::Completed, this, &ATileMiniGame::SelectTile);
+
+	EnhancedInputComponent->BindAction(PlayerBaseController->SelectUpAction, ETriggerEvent::Completed, this, &ATileMiniGame::MoveSelectionUp);
+	EnhancedInputComponent->BindAction(PlayerBaseController->SelectDownAction, ETriggerEvent::Completed, this, &ATileMiniGame::MoveSelectionDown);
+	EnhancedInputComponent->BindAction(PlayerBaseController->SelectLeftAction, ETriggerEvent::Completed, this, &ATileMiniGame::MoveSelectionLeft);
+	EnhancedInputComponent->BindAction(PlayerBaseController->SelectRightAction, ETriggerEvent::Completed, this, &ATileMiniGame::MoveSelectionRight);
 	
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
 

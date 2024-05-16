@@ -37,8 +37,9 @@ public:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	void SelectTile(const FInputActionValue& Value);
+	void SelectTile();
 	void PossessTile(const FInputActionValue& Value);
+	
 	void MoveSelectionUp(const FInputActionValue& Value);
 	void MoveSelectionDown(const FInputActionValue& Value);
 	void MoveSelectionLeft(const FInputActionValue& Value);
@@ -46,9 +47,12 @@ public:
 
 	UFUNCTION()
 	void OnPuzzleSolved();
-	
+
 	UFUNCTION()
-	void UpdateSelection();
+	void GetOverlappingTiles(UPrimitiveComponent* Trigger);
+	
+	//UFUNCTION()
+	//void UpdateSelection();
 
 	UFUNCTION()
 	void OnPuzzleAbandoned();
@@ -77,6 +81,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ATilePiece* TilePiece;
 
+	UPROPERTY(VisibleAnywhere)
+	TArray<AActor*> Actors;
+	
 	UPROPERTY()
 	ARelicHUD* HUD;
 

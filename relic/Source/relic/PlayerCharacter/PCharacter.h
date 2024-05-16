@@ -156,6 +156,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	ARelicHUD* HUD;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
+	USpringArmComponent* SpringArmComp;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
+	UCameraComponent* CameraComp;
+
 protected:
 	// FUNCTIONS
 	// -----------------------------
@@ -188,11 +194,7 @@ protected:
 	//UPROPERTY()
 	//ARelicHUD* HUD;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
-	USpringArmComponent* SpringArmComp;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
-	UCameraComponent* CameraComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Body")
 	USphereComponent* PlayerHead;
