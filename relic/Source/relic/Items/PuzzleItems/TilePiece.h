@@ -5,6 +5,7 @@
 #include "InputAction.h"
 #include "TilePiece.generated.h"
 
+class ATileMiniGame;
 class USphereComponent;
 class UStaticMeshComponent;
 class USphereComponent;
@@ -71,7 +72,7 @@ public:
 	class UInputMappingContext* PCMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ATilePiece* TilePiece;
+	ATileMiniGame* TileMiniGame;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterial* HighlightMaterial;

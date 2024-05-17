@@ -35,17 +35,31 @@ void ATilePiece::Tick(float DeltaSeconds)
 
 void ATilePiece::OnBecomePossessed()
 {
-	if (PlayerCharacter)
+	/*this->GetOverlappingComponents(Neighbors);
+	
+	for (int i = 1; i < Neighbors.Num(); i++)
 	{
-		PlayerCharacter->GetController()->Possess(this);
+		if (Neighbors[i]->GetAttachmentRootActor()->GetClass() != this->GetClass())
+		{
+			TileMiniGame = Cast<ATileMiniGame>(Neighbors[i]->GetAttachmentRootActor());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Cast to ATileGame failed.")); 
+		}
+	}
+	
+	if (TileMiniGame)
+	{
+		TileMiniGame->GetController()->Possess(this);
+
 		AutoPossessPlayer = EAutoReceiveInput::Player0;
-		PlayerCharacter->SetActorHiddenInGame(true);
 
 		FString CheckController = this->GetController()->GetName();
 		UE_LOG(LogTemp, Warning, TEXT(" %s "), *CheckController);
 
 		PlayerController = Cast<APController>(this->Controller);
-		
+
 		if (PlayerController)
 		{
 			// Not sure if this is still necessary, but it makes me feel safe
@@ -55,14 +69,41 @@ void ATilePiece::OnBecomePossessed()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Ref to Player Contoller not valid."));
 		}
-		
+	
 		UE_LOG(LogTemp, Warning, TEXT("ATilePiece: All refs valid. Pawn should be possessed."));
+	}*/
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->GetController()->Possess(this);
+		//AutoPossessPlayer = EAutoReceiveInput::Player0;
+		PlayerCharacter->SetActorHiddenInGame(true);
+
+		//TODO: figure out how to make camera view change to this pawns camera consistently
+
+		FString CheckController = this->GetController()->GetName();
+		UE_LOG(LogTemp, Warning, TEXT(" %s "), *CheckController); 
+
+		PlayerController = Cast<APController>(this->Controller);
+		
+		if (PlayerController)
+		{
+			// Not sure if this is still necessary, but it makes me feel safe
+			PCMappingContext = {PlayerController->PCMappingContext};
+			PlayerController->SetViewTarget(this);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Contoller not valid."));
+		}
+		
+		UE_LOG(LogTemp, Warning, TEXT("ATileGame: All refs valid. Pawn should be possessed."));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Ref to Player Character not valid.")); 
-
+		UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Ref to ATileGame not valid.")); 
 	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Possession action firing!")); 
 }
 
 void ATilePiece::OnBecomeUnPossessed()

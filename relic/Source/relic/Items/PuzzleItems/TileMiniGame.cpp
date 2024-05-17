@@ -114,6 +114,8 @@ void ATileMiniGame::SelectTile()
 
 	TriggerOne->SetHiddenInGame(true);
 	Actors.Empty();
+
+	bIsGaming = true;
 	
 	switch (TileSelectNum)
 	{
@@ -221,13 +223,17 @@ void ATileMiniGame::UpdateSelection()
 
 void ATileMiniGame::PossessTile(const FInputActionValue& Value)
 {
-	if (TilePiece)
+	if (bIsGaming)
 	{
-		//TilePiece->OnBecomePossessed();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Can't posess tile. No valid ref to ATilePiece."));
+		if (TilePiece)
+		{
+			OnBecomeUnPossessed();
+			TilePiece->OnBecomePossessed();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ATileGame: Can't posess tile. No valid ref to ATilePiece."));
+		}
 	}
 }
 
@@ -287,10 +293,8 @@ void ATileMiniGame::OnBecomePossessed()
 {
 	if (PlayerCharacter)
 	{
-		bIsGaming = true;
-		
 		PlayerCharacter->GetController()->Possess(this);
-		AutoPossessPlayer = EAutoReceiveInput::Player0;
+		//AutoPossessPlayer = EAutoReceiveInput::Player0;
 		PlayerCharacter->SetActorHiddenInGame(true);
 
 		//TODO: figure out how to make camera view change to this pawns camera consistently
@@ -318,7 +322,7 @@ void ATileMiniGame::OnBecomePossessed()
 		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Character not valid.")); 
 	}
 
-	SelectTile();
+	//SelectTile();
 
 	// Currently crashes game:
 	//CheckTilePlacement();
@@ -328,8 +332,6 @@ void ATileMiniGame::OnBecomeUnPossessed()
 {
 	if (PlayerCharacter)
 	{
-		bIsGaming = false;
-		
 		GetController()->UnPossess();
 		PlayerCharacter->AutoPossessPlayer = EAutoReceiveInput::Player0;
 		PlayerCharacter->SetActorHiddenInGame(false);
@@ -355,6 +357,8 @@ void ATileMiniGame::OnBecomeUnPossessed()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Character not valid."));
 	}
+
+	bIsGaming = false;
 }
 
 
