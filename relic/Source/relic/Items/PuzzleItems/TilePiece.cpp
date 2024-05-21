@@ -3,6 +3,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TileMiniGame.h"
+#include "Camera/CameraActor.h"
 #include "Components/SphereComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
@@ -75,7 +76,7 @@ void ATilePiece::OnBecomePossessed()
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->GetController()->Possess(this);
-		//AutoPossessPlayer = EAutoReceiveInput::Player0;
+		AutoPossessPlayer = EAutoReceiveInput::Player0;
 		PlayerCharacter->SetActorHiddenInGame(true);
 
 		//TODO: figure out how to make camera view change to this pawns camera consistently
@@ -89,7 +90,7 @@ void ATilePiece::OnBecomePossessed()
 		{
 			// Not sure if this is still necessary, but it makes me feel safe
 			PCMappingContext = {PlayerController->PCMappingContext};
-			PlayerController->SetViewTarget(this);
+			PlayerController->SetViewTarget(TileFacingCamera);
 		}
 		else
 		{
@@ -110,8 +111,10 @@ void ATilePiece::OnBecomeUnPossessed()
 {
 	if (PlayerCharacter)
 	{
-		GetController()->UnPossess();
-		PlayerCharacter->TileGame->OnBecomePossessed();
+		//GetController()->UnPossess();
+		//PlayerCharacter->TileGame->OnBecomePossessed();
+
+		UE_LOG(LogTemp, Warning, TEXT("ATilePiece: OnBecomeUnpossessed action triggered successfully.")); 
 	}
 	else
 	{
@@ -120,18 +123,17 @@ void ATilePiece::OnBecomeUnPossessed()
 }
 
 //TODO: This needs to be edited to only move on the Z and Y axes
-void ATilePiece::MoveTile(const FInputActionValue& Value)
+void ATilePiece::MoveTileDown(const FInputActionValue& Value)
 {
 	FVector Input = Value.Get<FInputActionValue::Axis3D>();
 
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+	FVector CurrentTileLocation = this->GetActorLocation();
 
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(ForwardDirection, Input.Y);
+	float TravelRate = 50.0f;
 
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(RightDirection, Input.X);
+	FVector NewTileLocation = FVector(CurrentTileLocation.X, CurrentTileLocation.Y, CurrentTileLocation.Z - TravelRate * Input.Z);
+
+	SetActorLocation(NewTileLocation);
 }
 
 //TODO: Learn more about overlay materials, make these translucent instead of opaque - they are completely hiding the tiles
@@ -152,8 +154,8 @@ void ATilePiece::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	APController* PlayerBaseController = CastChecked<APController>(Controller);
 	
-	EnhancedInputComponent->BindAction(PlayerBaseController->MoveAction, ETriggerEvent::Completed, this, &ATilePiece::MoveTile);
-	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Completed, this, &ATilePiece::OnBecomeUnPossessed);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileDownAction, ETriggerEvent::Triggered, this, &ATilePiece::MoveTileDown);
+	EnhancedInputComponent->BindAction(PlayerBaseController->BackAction, ETriggerEvent::Completed, this, &ATilePiece::OnBecomeUnPossessed);
 	
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();
 

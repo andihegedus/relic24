@@ -101,6 +101,9 @@ public:
 	UPROPERTY()
 	UMaterial* Highlight;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ACameraActor* TileFacingCamera;
+
 	int32 TileSelectNum;
 
 

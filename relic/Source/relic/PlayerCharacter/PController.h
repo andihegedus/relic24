@@ -54,6 +54,24 @@ public:
 	class UInputAction* InteractAction;
 
 	UPROPERTY()
+	class UInputAction* TileSelectAction;
+
+	UPROPERTY()
+	class UInputAction* BackAction;
+
+	UPROPERTY()
+	class UInputAction* TileUpAction;
+
+	UPROPERTY()
+	class UInputAction* TileDownAction;
+
+	UPROPERTY()
+	class UInputAction* TileLeftAction;
+
+	UPROPERTY()
+	class UInputAction* TileRightAction;
+
+	UPROPERTY()
 	class UInputAction* AimAction;
 
 	UPROPERTY()

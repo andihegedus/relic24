@@ -33,7 +33,7 @@ public:
 	
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	void MoveTile(const FInputActionValue& Value);
+	void MoveTileDown(const FInputActionValue& Value);
 	
 	UFUNCTION()
 	void OnBecomePossessed();
@@ -79,6 +79,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterial* TransparentMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ACameraActor* TileFacingCamera;
 	
 	bool bAllNeighborsFound;
 

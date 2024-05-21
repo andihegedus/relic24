@@ -3,6 +3,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TilePiece.h"
+#include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
@@ -294,7 +295,7 @@ void ATileMiniGame::OnBecomePossessed()
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->GetController()->Possess(this);
-		//AutoPossessPlayer = EAutoReceiveInput::Player0;
+		AutoPossessPlayer = EAutoReceiveInput::Player0;
 		PlayerCharacter->SetActorHiddenInGame(true);
 
 		//TODO: figure out how to make camera view change to this pawns camera consistently
@@ -308,7 +309,7 @@ void ATileMiniGame::OnBecomePossessed()
 		{
 			// Not sure if this is still necessary, but it makes me feel safe
 			PCMappingContext = {PlayerController->PCMappingContext};
-			PlayerController->SetViewTarget(this);
+			PlayerController->SetViewTarget(TileFacingCamera);
 		}
 		else
 		{
@@ -477,7 +478,7 @@ void ATileMiniGame::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	APController* PlayerBaseController = CastChecked<APController>(Controller);
 	
-	EnhancedInputComponent->BindAction(PlayerBaseController->InteractAction, ETriggerEvent::Triggered, this, &ATileMiniGame::PossessTile);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileSelectAction, ETriggerEvent::Triggered, this, &ATileMiniGame::PossessTile);
 	EnhancedInputComponent->BindAction(PlayerBaseController->EscapeAction, ETriggerEvent::Completed, this, &ATileMiniGame::OnPuzzleAbandoned);
 
 	EnhancedInputComponent->BindAction(PlayerBaseController->SelectUpAction, ETriggerEvent::Completed, this, &ATileMiniGame::MoveSelectionUp);

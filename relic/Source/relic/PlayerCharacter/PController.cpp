@@ -27,12 +27,32 @@ void APController::SetupInputComponent()
 
 	PCMappingContext = NewObject<UInputMappingContext>(this);
 
-	// To move (ACharacter, ATilePiece)
+	// To move (ACharacter)
 	MoveAction = NewObject<UInputAction>(this);
 	MoveAction->ValueType = EInputActionValueType::Axis3D;
 	SetupKeyMap(PCMappingContext, MoveAction, EKeys::W, false, false, EInputAxisSwizzle::YXZ);
 	SetupKeyMap(PCMappingContext, MoveAction, EKeys::S, true, false, EInputAxisSwizzle::YXZ);
 	SetupKeyMap(PCMappingContext, MoveAction, EKeys::A, true, true, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, MoveAction, EKeys::D, false, true, EInputAxisSwizzle::YXZ);
+
+	// To move tile up (ATilePiece)
+	TileUpAction = NewObject<UInputAction>(this);
+	TileUpAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, TileUpAction, EKeys::W, false, false, EInputAxisSwizzle::YXZ);
+
+	// To move tile down (ATilePiece)
+	TileDownAction = NewObject<UInputAction>(this);
+	TileDownAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, MoveAction, EKeys::S, true, false, EInputAxisSwizzle::YXZ);
+
+	// To move tile left (ATilePiece)
+	TileLeftAction = NewObject<UInputAction>(this);
+	TileLeftAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, MoveAction, EKeys::A, true, true, EInputAxisSwizzle::YXZ);
+
+	// To move tile right (ATilePiece)
+	TileRightAction = NewObject<UInputAction>(this);
+	TileRightAction->ValueType = EInputActionValueType::Axis3D;
 	SetupKeyMap(PCMappingContext, MoveAction, EKeys::D, false, true, EInputAxisSwizzle::YXZ);
 
 	// To move tile selection up (ATileGame)
@@ -61,10 +81,20 @@ void APController::SetupInputComponent()
 	SetupKeyMap(PCMappingContext, LookAction, EKeys::MouseY, false, false, EInputAxisSwizzle::YXZ);
 	SetupKeyMap(PCMappingContext, LookAction, EKeys::MouseX, false, true, EInputAxisSwizzle::YXZ);
 
-	// To interact (ACharacter, ATilePiece, ATileGame)
+	// To interact (ACharacter)
 	InteractAction = NewObject<UInputAction>(this);
 	InteractAction->ValueType = EInputActionValueType::Axis3D;
 	SetupKeyMap(PCMappingContext, InteractAction, EKeys::E, false, false, EInputAxisSwizzle::YXZ);
+
+	// To select a tile (ATileGame)
+	TileSelectAction = NewObject<UInputAction>(this);
+	TileSelectAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, TileSelectAction, EKeys::Enter, false, false, EInputAxisSwizzle::YXZ);
+
+	// To back out of current screen (ATilePiece)
+	BackAction = NewObject<UInputAction>(this);
+	BackAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, BackAction, EKeys::Q, false, false, EInputAxisSwizzle::YXZ);
 
 	// To activate device (ACharacter)
 	DeviceAction = NewObject<UInputAction>(this);
