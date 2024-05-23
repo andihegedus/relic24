@@ -35,6 +35,14 @@ void APController::SetupInputComponent()
 	SetupKeyMap(PCMappingContext, MoveAction, EKeys::A, true, true, EInputAxisSwizzle::YXZ);
 	SetupKeyMap(PCMappingContext, MoveAction, EKeys::D, false, true, EInputAxisSwizzle::YXZ);
 
+	// To move (ATilePiece)
+	TileMoveAction = NewObject<UInputAction>(this);
+	TileMoveAction->ValueType = EInputActionValueType::Axis3D;
+	SetupKeyMap(PCMappingContext, TileMoveAction, EKeys::W, false, false, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, TileMoveAction, EKeys::S, true, false, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, TileMoveAction, EKeys::A, true, true, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, TileMoveAction, EKeys::D, false, true, EInputAxisSwizzle::YXZ);
+
 	// To move tile up (ATilePiece)
 	TileUpAction = NewObject<UInputAction>(this);
 	TileUpAction->ValueType = EInputActionValueType::Axis3D;
@@ -43,17 +51,17 @@ void APController::SetupInputComponent()
 	// To move tile down (ATilePiece)
 	TileDownAction = NewObject<UInputAction>(this);
 	TileDownAction->ValueType = EInputActionValueType::Axis3D;
-	SetupKeyMap(PCMappingContext, MoveAction, EKeys::S, true, false, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, TileDownAction, EKeys::S, true, false, EInputAxisSwizzle::YXZ);
 
 	// To move tile left (ATilePiece)
 	TileLeftAction = NewObject<UInputAction>(this);
 	TileLeftAction->ValueType = EInputActionValueType::Axis3D;
-	SetupKeyMap(PCMappingContext, MoveAction, EKeys::A, true, true, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, TileLeftAction, EKeys::A, true, true, EInputAxisSwizzle::YXZ);
 
 	// To move tile right (ATilePiece)
 	TileRightAction = NewObject<UInputAction>(this);
 	TileRightAction->ValueType = EInputActionValueType::Axis3D;
-	SetupKeyMap(PCMappingContext, MoveAction, EKeys::D, false, true, EInputAxisSwizzle::YXZ);
+	SetupKeyMap(PCMappingContext, TileRightAction, EKeys::D, false, true, EInputAxisSwizzle::YXZ);
 
 	// To move tile selection up (ATileGame)
 	SelectUpAction = NewObject<UInputAction>(this);

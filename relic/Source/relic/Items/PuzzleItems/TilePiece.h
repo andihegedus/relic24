@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "InputAction.h"
+#include "GameFramework/Character.h"
 #include "TilePiece.generated.h"
 
 class ATileMiniGame;
@@ -34,6 +35,9 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	void MoveTileDown(const FInputActionValue& Value);
+	void MoveTileUp(const FInputActionValue& Value);
+	void MoveTileRight(const FInputActionValue& Value);
+	void MoveTileLeft(const FInputActionValue& Value);
 	
 	UFUNCTION()
 	void OnBecomePossessed();
@@ -58,6 +62,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category="TilePiece | Components")
 	USphereComponent* SphereCollision;
+
+	UPROPERTY(VisibleAnywhere, Category="TilePiece | Components")
+	UFloatingPawnMovement* FloatingPawnMovement;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APCharacter* PlayerCharacter;
@@ -86,6 +93,8 @@ public:
 	bool bAllNeighborsFound;
 
 	int32 TileID;
+
+	FVector OGLocation;
 	
 
 protected:

@@ -6,6 +6,8 @@
 #include "Camera/CameraActor.h"
 #include "Components/SphereComponent.h"
 #include "Engine/LocalPlayer.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/PlayerController.h"
 #include "relic/PlayerCharacter/PCharacter.h"
 #include "relic/PlayerCharacter/PController.h"
@@ -18,6 +20,13 @@ ATilePiece::ATilePiece()
 
 	SphereCollision = CreateDefaultSubobject<USphereComponent>("CollisionTop");
 	SphereCollision->SetupAttachment(TilePieceComp);
+
+	FloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>("PawnMovement");
+	
+	// Untick inherit R,P,Y for character
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
 }
 
 void ATilePiece::BeginPlay()
@@ -27,6 +36,8 @@ void ATilePiece::BeginPlay()
 	PlayerCharacter = Cast<APCharacter>(GetWorld()->GetGameInstance()->GetFirstLocalPlayerController()->GetPawn());
 
 	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+
+	//this->SetActorLocation(OGLocation);
 }
 
 void ATilePiece::Tick(float DeltaSeconds)
@@ -94,10 +105,15 @@ void ATilePiece::OnBecomePossessed()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ATileGame: Ref to Player Contoller not valid."));
+			UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Ref to Player Contoller not valid."));
 		}
+
+		if (TilePieceComp->ComponentTags.Num() > 0)
+		{
+			FName Tag = TilePieceComp->ComponentTags[0];
 		
-		UE_LOG(LogTemp, Warning, TEXT("ATileGame: All refs valid. Pawn should be possessed."));
+			UE_LOG(LogTemp, Warning, TEXT("ATilePiece: All refs valid. Pawn %s should be possessed."), *Tag.ToString());
+		}
 	}
 	else
 	{
@@ -125,15 +141,37 @@ void ATilePiece::OnBecomeUnPossessed()
 //TODO: This needs to be edited to only move on the Z and Y axes
 void ATilePiece::MoveTileDown(const FInputActionValue& Value)
 {
-	FVector Input = Value.Get<FInputActionValue::Axis3D>();
+	FVector CurrentLocation = this->GetActorLocation();
 
-	FVector CurrentTileLocation = this->GetActorLocation();
+	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y, CurrentLocation.Z - 1.f);
+	SetActorLocation(Move);
+	
+	//UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Moving Down!, %s "), *Move.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Moving left/right!, %s "), *RightDirection.ToString()); 
+}
 
-	float TravelRate = 50.0f;
+void ATilePiece::MoveTileUp(const FInputActionValue& Value)
+{
+	FVector CurrentLocation = this->GetActorLocation();
 
-	FVector NewTileLocation = FVector(CurrentTileLocation.X, CurrentTileLocation.Y, CurrentTileLocation.Z - TravelRate * Input.Z);
+	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y, CurrentLocation.Z + 1.f);
+	SetActorLocation(Move);
+}
 
-	SetActorLocation(NewTileLocation);
+void ATilePiece::MoveTileRight(const FInputActionValue& Value)
+{
+	FVector CurrentLocation = this->GetActorLocation();
+
+	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y - 1.f, CurrentLocation.Z);
+	SetActorLocation(Move);
+}
+
+void ATilePiece::MoveTileLeft(const FInputActionValue& Value)
+{
+	FVector CurrentLocation = this->GetActorLocation();
+
+	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y + 1.f, CurrentLocation.Z);
+	SetActorLocation(Move);
 }
 
 //TODO: Learn more about overlay materials, make these translucent instead of opaque - they are completely hiding the tiles
@@ -155,6 +193,9 @@ void ATilePiece::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	APController* PlayerBaseController = CastChecked<APController>(Controller);
 	
 	EnhancedInputComponent->BindAction(PlayerBaseController->TileDownAction, ETriggerEvent::Triggered, this, &ATilePiece::MoveTileDown);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileUpAction, ETriggerEvent::Triggered, this, &ATilePiece::MoveTileUp);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileRightAction, ETriggerEvent::Triggered, this, &ATilePiece::MoveTileRight);
+	EnhancedInputComponent->BindAction(PlayerBaseController->TileLeftAction, ETriggerEvent::Triggered, this, &ATilePiece::MoveTileLeft);
 	EnhancedInputComponent->BindAction(PlayerBaseController->BackAction, ETriggerEvent::Completed, this, &ATilePiece::OnBecomeUnPossessed);
 	
 	ULocalPlayer* LocalPlayer = PlayerBaseController->GetLocalPlayer();

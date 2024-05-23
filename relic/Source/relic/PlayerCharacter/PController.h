@@ -60,6 +60,9 @@ public:
 	class UInputAction* BackAction;
 
 	UPROPERTY()
+	class UInputAction* TileMoveAction;
+
+	UPROPERTY()
 	class UInputAction* TileUpAction;
 
 	UPROPERTY()
