@@ -4,6 +4,7 @@
 #include "GameFramework/Pawn.h"
 #include "InputAction.h"
 #include "GameFramework/Character.h"
+#include "relic/PlayerCharacter/PCharacter.h"
 #include "TilePiece.generated.h"
 
 class ATileMiniGame;
@@ -95,6 +96,8 @@ public:
 	int32 TileID;
 
 	FVector OGLocation;
+
+	bool bStopMovement;
 	
 
 protected:
@@ -117,5 +120,13 @@ protected:
 
 	UPROPERTY()
 	UPrimitiveComponent* Neighbor;
+
+	FInteractionInfo InteractionInfo;
+
+	FVector LineTraceStart;
+
+	float CheckInteractionDistance;
+
+	float Stop;
 	
 };

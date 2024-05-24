@@ -27,6 +27,8 @@ ATilePiece::ATilePiece()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
+
+	CheckInteractionDistance = 5.f;
 }
 
 void ATilePiece::BeginPlay()
@@ -37,12 +39,23 @@ void ATilePiece::BeginPlay()
 
 	HUD = Cast<ARelicHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
+	bStopMovement = false;
+
 	//this->SetActorLocation(OGLocation);
 }
 
 void ATilePiece::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (bStopMovement == true)
+	{
+		this->bLockLocation = true;
+	}
+	else
+	{
+		this->bLockLocation = false;
+	}
 }
 
 void ATilePiece::OnBecomePossessed()
@@ -141,6 +154,20 @@ void ATilePiece::OnBecomeUnPossessed()
 //TODO: This needs to be edited to only move on the Z and Y axes
 void ATilePiece::MoveTileDown(const FInputActionValue& Value)
 {
+	bStopMovement = false;
+	
+	this->GetOverlappingActors(Actors);
+	
+	for (int i = 1; i < Actors.Num(); i++)
+	{
+		if (Actors[i]->GetClass() == this->GetClass())
+		{
+			bStopMovement = true;
+
+			return;
+		}
+	}
+	
 	FVector CurrentLocation = this->GetActorLocation();
 
 	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y, CurrentLocation.Z - 1.f);
@@ -152,6 +179,20 @@ void ATilePiece::MoveTileDown(const FInputActionValue& Value)
 
 void ATilePiece::MoveTileUp(const FInputActionValue& Value)
 {
+	bStopMovement = false;
+	
+	this->GetOverlappingActors(Actors);
+	
+	for (int i = 1; i < Actors.Num(); i++)
+	{
+		if (Actors[i]->GetClass() == this->GetClass())
+		{
+			bStopMovement = true;
+
+			return;
+		}
+	}
+	
 	FVector CurrentLocation = this->GetActorLocation();
 
 	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y, CurrentLocation.Z + 1.f);
@@ -160,6 +201,28 @@ void ATilePiece::MoveTileUp(const FInputActionValue& Value)
 
 void ATilePiece::MoveTileRight(const FInputActionValue& Value)
 {
+	bStopMovement = false;
+	
+	this->GetOverlappingActors(Actors);
+	
+	for (int i = 1; i < Actors.Num(); i++)
+	{
+		if (Actors[i]->GetClass() == this->GetClass())
+		{
+			/*FVector CurrentLocation = this->GetActorLocation();
+			
+			FMath::Clamp(Stop, CurrentLocation.Y, CurrentLocation.Y);
+
+			FVector StoppedLocation = FVector(CurrentLocation.X, Stop, CurrentLocation.Z);
+
+			SetActorLocation(StoppedLocation);*/
+
+			bStopMovement = true;
+
+			return;
+		}
+	}
+	
 	FVector CurrentLocation = this->GetActorLocation();
 
 	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y - 1.f, CurrentLocation.Z);
@@ -168,7 +231,63 @@ void ATilePiece::MoveTileRight(const FInputActionValue& Value)
 
 void ATilePiece::MoveTileLeft(const FInputActionValue& Value)
 {
-	FVector CurrentLocation = this->GetActorLocation();
+	InteractionInfo.CheckLastInteractionTime = GetWorld()->GetTimeSeconds();
+
+	FVector CurrentLocation = GetActorLocation();
+	
+	LineTraceStart = FVector(CurrentLocation.X, CurrentLocation.Y + 115.f, CurrentLocation.Z + 55.f);
+	
+	FVector LineTraceEnd{FVector(LineTraceStart.X, LineTraceStart.Y - CheckInteractionDistance, LineTraceStart.Z)};
+	float LookDirection = FVector::DotProduct(GetActorForwardVector(), GetViewRotation().Vector());
+
+	if (LookDirection > 0)
+	{
+		// Visualize our trace hit line
+		DrawDebugLine(GetWorld(), LineTraceEnd, LineTraceStart, FColor::Magenta, false, 1.0f, 0, 50.f);
+
+		// Contains useful things for line tracing
+		FCollisionQueryParams QueryParams;
+
+		// I'm the class shooting out the line trace, don't want to hit myself
+		QueryParams.AddIgnoredActor(this);
+
+		// Store the result of the line trace, also contains the actor that was hit
+		FHitResult TraceHit;
+
+		if(GetWorld()->LineTraceSingleByChannel(TraceHit, LineTraceEnd, LineTraceStart, ECC_Visibility, QueryParams))
+		{
+			if (TraceHit.GetActor()->GetClass() == this->GetClass())
+			{
+				bStopMovement = true;
+
+				return;
+			}
+		}
+	}
+	
+	/*bStopMovement = false;
+	
+	this->GetOverlappingActors(Actors);
+	
+	for (int i = 1; i < Actors.Num(); i++)
+	{
+		if (Actors[i]->GetClass() == this->GetClass())
+		{
+			FVector CurrentLocation = this->GetActorLocation();
+			
+			FMath::Clamp(Stop, CurrentLocation.Y - 50.f, CurrentLocation.Y);
+
+			FVector StoppedLocation = FVector(CurrentLocation.X, Stop, CurrentLocation.Z);
+
+			SetActorLocation(StoppedLocation);
+
+			bStopMovement = true;
+
+			return;
+		}
+	}*/
+	
+	//FVector CurrentLocation = this->GetActorLocation();
 
 	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y + 1.f, CurrentLocation.Z);
 	SetActorLocation(Move);
