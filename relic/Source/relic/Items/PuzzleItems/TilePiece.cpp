@@ -6,7 +6,6 @@
 #include "Camera/CameraActor.h"
 #include "Components/SphereComponent.h"
 #include "Engine/LocalPlayer.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/PlayerController.h"
 #include "relic/PlayerCharacter/PCharacter.h"
@@ -28,7 +27,11 @@ ATilePiece::ATilePiece()
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
 
-	CheckInteractionDistance = 5.f;
+	CheckInteractionDistance = 0.001f;
+
+	TilePieceTag = "Piece";
+	//SphereCollision->ComponentTags.Add(TilePieceTag);
+	this->Tags.Add(TilePieceTag);
 }
 
 void ATilePiece::BeginPlay()
@@ -41,6 +44,8 @@ void ATilePiece::BeginPlay()
 
 	bStopMovement = false;
 
+	//SetActorRotation(FRotator(0.f, 0.f, 0.f));
+
 	//this->SetActorLocation(OGLocation);
 }
 
@@ -50,11 +55,13 @@ void ATilePiece::Tick(float DeltaSeconds)
 
 	if (bStopMovement == true)
 	{
-		this->bLockLocation = true;
+		//this->bLockLocation = true;
+		
+		//Actors.Empty();
 	}
 	else
 	{
-		this->bLockLocation = false;
+		//this->bLockLocation = false;
 	}
 }
 
@@ -140,8 +147,15 @@ void ATilePiece::OnBecomeUnPossessed()
 {
 	if (PlayerCharacter)
 	{
-		//GetController()->UnPossess();
-		//PlayerCharacter->TileGame->OnBecomePossessed();
+		GetController()->UnPossess();
+		PlayerCharacter->AutoPossessPlayer = EAutoReceiveInput::Player0;
+		PlayerController = Cast<APController>(GetWorld()->GetGameInstance()->GetPrimaryPlayerController());
+
+		if (PlayerController)
+		{
+			PlayerController->Possess(PlayerCharacter);
+			PlayerCharacter->TileGame->OnBecomePossessed();
+		}
 
 		UE_LOG(LogTemp, Warning, TEXT("ATilePiece: OnBecomeUnpossessed action triggered successfully.")); 
 	}
@@ -154,7 +168,7 @@ void ATilePiece::OnBecomeUnPossessed()
 //TODO: This needs to be edited to only move on the Z and Y axes
 void ATilePiece::MoveTileDown(const FInputActionValue& Value)
 {
-	bStopMovement = false;
+	Actors.Empty();
 	
 	this->GetOverlappingActors(Actors);
 	
@@ -162,11 +176,19 @@ void ATilePiece::MoveTileDown(const FInputActionValue& Value)
 	{
 		if (Actors[i]->GetClass() == this->GetClass())
 		{
-			bStopMovement = true;
+			/*FVector Location = this->GetActorLocation();
 
-			return;
+			FVector StoppedLocation = FVector(Location.X, Location.Y, Location.Z + 1.f);
+
+			SetActorLocation(StoppedLocation);
+
+			bStopMovement = true;
+			
+			return;*/
 		}
 	}
+
+	bStopMovement = false;
 	
 	FVector CurrentLocation = this->GetActorLocation();
 
@@ -179,7 +201,7 @@ void ATilePiece::MoveTileDown(const FInputActionValue& Value)
 
 void ATilePiece::MoveTileUp(const FInputActionValue& Value)
 {
-	bStopMovement = false;
+	Actors.Empty();
 	
 	this->GetOverlappingActors(Actors);
 	
@@ -187,11 +209,19 @@ void ATilePiece::MoveTileUp(const FInputActionValue& Value)
 	{
 		if (Actors[i]->GetClass() == this->GetClass())
 		{
+			/*FVector Location = this->GetActorLocation();
+
+			FVector StoppedLocation = FVector(Location.X, Location.Y, Location.Z - 1.f);
+
+			SetActorLocation(StoppedLocation);
+
 			bStopMovement = true;
 
-			return;
+			return;*/
 		}
 	}
+	
+	bStopMovement = false;
 	
 	FVector CurrentLocation = this->GetActorLocation();
 
@@ -201,7 +231,7 @@ void ATilePiece::MoveTileUp(const FInputActionValue& Value)
 
 void ATilePiece::MoveTileRight(const FInputActionValue& Value)
 {
-	bStopMovement = false;
+	Actors.Empty();
 	
 	this->GetOverlappingActors(Actors);
 	
@@ -209,19 +239,19 @@ void ATilePiece::MoveTileRight(const FInputActionValue& Value)
 	{
 		if (Actors[i]->GetClass() == this->GetClass())
 		{
-			/*FVector CurrentLocation = this->GetActorLocation();
-			
-			FMath::Clamp(Stop, CurrentLocation.Y, CurrentLocation.Y);
+			/*FVector Location = this->GetActorLocation();
 
-			FVector StoppedLocation = FVector(CurrentLocation.X, Stop, CurrentLocation.Z);
+			FVector StoppedLocation = FVector(Location.X, Location.Y + 1.f, Location.Z);
 
-			SetActorLocation(StoppedLocation);*/
+			SetActorLocation(StoppedLocation);
 
 			bStopMovement = true;
 
-			return;
+			return;*/
 		}
 	}
+
+	bStopMovement = false;
 	
 	FVector CurrentLocation = this->GetActorLocation();
 
@@ -235,37 +265,53 @@ void ATilePiece::MoveTileLeft(const FInputActionValue& Value)
 
 	FVector CurrentLocation = GetActorLocation();
 	
-	LineTraceStart = FVector(CurrentLocation.X, CurrentLocation.Y + 115.f, CurrentLocation.Z + 55.f);
+	LineTraceStart = FVector(CurrentLocation.X, CurrentLocation.Y + 90.f, CurrentLocation.Z + 60.f);
+
+	FVector RightVector = GetActorRightVector();
+
+	FVector LeftVector = FVector(RightVector.X, -RightVector.Y, RightVector.Z);
 	
-	FVector LineTraceEnd{FVector(LineTraceStart.X, LineTraceStart.Y - CheckInteractionDistance, LineTraceStart.Z)};
-	float LookDirection = FVector::DotProduct(GetActorForwardVector(), GetViewRotation().Vector());
+	FVector LineTraceEnd{FVector(LineTraceStart.X, LineTraceStart.Y + CheckInteractionDistance, LineTraceStart.Z)};
+	float LookDirection = FVector::DotProduct(LeftVector, LineTraceStart);
 
 	if (LookDirection > 0)
 	{
 		// Visualize our trace hit line
-		DrawDebugLine(GetWorld(), LineTraceEnd, LineTraceStart, FColor::Magenta, false, 1.0f, 0, 50.f);
+		DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd , FColor::Magenta, false, 1.0f, 0, 1.f);
 
 		// Contains useful things for line tracing
 		FCollisionQueryParams QueryParams;
 
 		// I'm the class shooting out the line trace, don't want to hit myself
-		QueryParams.AddIgnoredActor(this);
+		//QueryParams.AddIgnoredActor(this);
+
+		QueryParams.ClearIgnoredActors();
 
 		// Store the result of the line trace, also contains the actor that was hit
 		FHitResult TraceHit;
 
-		if(GetWorld()->LineTraceSingleByChannel(TraceHit, LineTraceEnd, LineTraceStart, ECC_Visibility, QueryParams))
+		if(GetWorld()->LineTraceSingleByChannel(TraceHit, LineTraceStart,  LineTraceEnd, ECC_Visibility, QueryParams))
 		{
-			if (TraceHit.GetActor()->GetClass() == this->GetClass())
+			if (TraceHit.GetActor()->Tags.Contains("Piece") || TraceHit.GetActor() == this)
 			{
-				bStopMovement = true;
-
+				UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Boop!.")); 
 				return;
+			}
+			if (TraceHit.GetActor()->Tags.Contains("TileGame"))
+			{
+
+				//UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Game!.")); 
+				//return;
 			}
 		}
 	}
+
+	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y + 1.f, CurrentLocation.Z);
+
+	SetActorLocation(Move);
+
 	
-	/*bStopMovement = false;
+/*	Actors.Empty();
 	
 	this->GetOverlappingActors(Actors);
 	
@@ -273,11 +319,9 @@ void ATilePiece::MoveTileLeft(const FInputActionValue& Value)
 	{
 		if (Actors[i]->GetClass() == this->GetClass())
 		{
-			FVector CurrentLocation = this->GetActorLocation();
-			
-			FMath::Clamp(Stop, CurrentLocation.Y - 50.f, CurrentLocation.Y);
+			FVector Location = this->GetActorLocation();
 
-			FVector StoppedLocation = FVector(CurrentLocation.X, Stop, CurrentLocation.Z);
+			FVector StoppedLocation = FVector(Location.X, Location.Y - 1.f, Location.Z);
 
 			SetActorLocation(StoppedLocation);
 
@@ -285,12 +329,15 @@ void ATilePiece::MoveTileLeft(const FInputActionValue& Value)
 
 			return;
 		}
-	}*/
-	
-	//FVector CurrentLocation = this->GetActorLocation();
+	}
+
+	bStopMovement = false;
+
+	FVector CurrentLocation = this->GetActorLocation();
 
 	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y + 1.f, CurrentLocation.Z);
-	SetActorLocation(Move);
+	
+	SetActorLocation(Move);*/
 }
 
 //TODO: Learn more about overlay materials, make these translucent instead of opaque - they are completely hiding the tiles
