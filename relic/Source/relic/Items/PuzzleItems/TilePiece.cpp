@@ -8,9 +8,11 @@
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/PlayerController.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "relic/PlayerCharacter/PCharacter.h"
 #include "relic/PlayerCharacter/PController.h"
 #include "relic/System/RelicHUD.h"
+#include "Util/ColorConstants.h"
 
 ATilePiece::ATilePiece()
 {
@@ -201,29 +203,50 @@ void ATilePiece::MoveTileDown(const FInputActionValue& Value)
 
 void ATilePiece::MoveTileUp(const FInputActionValue& Value)
 {
-	Actors.Empty();
+	InteractionInfo.CheckLastInteractionTime = GetWorld()->GetTimeSeconds();
+
+	FVector CurrentLocation = GetActorLocation();
+
+	FVector UpVector = GetActorUpVector();
+
+	FVector DownVector = FVector(UpVector.X, UpVector.Y, -UpVector.Z);
+
+	// Three line traces from each side to make
+	LineTraceStart = FVector(CurrentLocation.X, CurrentLocation.Y + 60.f , CurrentLocation.Z + 90.5f);
+	FVector LineTraceEnd{FVector(LineTraceStart.X, LineTraceStart.Y + CheckInteractionDistance, LineTraceStart.Z)};
 	
-	this->GetOverlappingActors(Actors);
-	
-	for (int i = 1; i < Actors.Num(); i++)
+	float LookDirection = FVector::DotProduct(DownVector, LineTraceEnd);
+
+	if (LookDirection > 0)
 	{
-		if (Actors[i]->GetClass() == this->GetClass())
+		// Visualize our trace hit line
+		DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd , FColor::Magenta, false, 1.0f, 0, 1.f);
+		
+		FCollisionQueryParams QueryParams;
+		
+		QueryParams.ClearIgnoredActors();
+
+		// Store the result of the line trace, also contains the actor that was hit
+		FHitResult TraceHit;
+
+		FVector HalfSize = FVector(0.25f, 25.f, 0.25f);
+
+		FRotator Orientation = FRotator(0.f, 0.f, 0.f);
+
+		if (UKismetSystemLibrary::BoxTraceSingle(GetWorld(), LineTraceStart, LineTraceEnd, HalfSize, Orientation, TraceTypeQuery1, false, Actors, EDrawDebugTrace::None, TraceHit, false, FColor::Magenta, FColor::Blue, 1.0f))
 		{
-			/*FVector Location = this->GetActorLocation();
-
-			FVector StoppedLocation = FVector(Location.X, Location.Y, Location.Z - 1.f);
-
-			SetActorLocation(StoppedLocation);
-
-			bStopMovement = true;
-
-			return;*/
+			if (TraceHit.GetActor()->Tags.Contains("Piece") || TraceHit.GetActor() == this)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Boop!.")); 
+				return;
+			}
+			if (TraceHit.GetActor()->Tags.Contains("Wall"))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Wall!.")); 
+				//return;
+			}
 		}
 	}
-	
-	bStopMovement = false;
-	
-	FVector CurrentLocation = this->GetActorLocation();
 
 	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y, CurrentLocation.Z + 1.f);
 	SetActorLocation(Move);
@@ -231,31 +254,53 @@ void ATilePiece::MoveTileUp(const FInputActionValue& Value)
 
 void ATilePiece::MoveTileRight(const FInputActionValue& Value)
 {
-	Actors.Empty();
+	InteractionInfo.CheckLastInteractionTime = GetWorld()->GetTimeSeconds();
+
+	FVector CurrentLocation = GetActorLocation();
+
+	FVector RightVector = GetActorRightVector();
+
+	FVector LeftVector = FVector(RightVector.X, -RightVector.Y, RightVector.Z);
+
+	// Three line traces from each side to make
+	LineTraceStart = FVector(CurrentLocation.X, CurrentLocation.Y + 36.5f, CurrentLocation.Z + 60.f);
+	FVector LineTraceEnd{FVector(LineTraceStart.X, LineTraceStart.Y + CheckInteractionDistance, LineTraceStart.Z)};
 	
-	this->GetOverlappingActors(Actors);
-	
-	for (int i = 1; i < Actors.Num(); i++)
+	float LookDirection = FVector::DotProduct(LeftVector, LineTraceStart);
+
+	if (LookDirection > 0)
 	{
-		if (Actors[i]->GetClass() == this->GetClass())
+		// Visualize our trace hit line
+		//DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd , FColor::Magenta, false, 1.0f, 0, 1.f);
+		
+		FCollisionQueryParams QueryParams;
+		
+		QueryParams.ClearIgnoredActors();
+
+		// Store the result of the line trace, also contains the actor that was hit
+		FHitResult TraceHit;
+
+		FVector HalfSize = FVector(20.f, 0.25f, 25.f);
+
+		FRotator Orientation = FRotator(0.f, 0.f, 0.f);
+
+		if (UKismetSystemLibrary::BoxTraceSingle(GetWorld(), LineTraceStart, LineTraceEnd, HalfSize, Orientation, TraceTypeQuery1, false, Actors, EDrawDebugTrace::None, TraceHit, false, FColor::Magenta, FColor::Blue, 1.0f))
 		{
-			/*FVector Location = this->GetActorLocation();
-
-			FVector StoppedLocation = FVector(Location.X, Location.Y + 1.f, Location.Z);
-
-			SetActorLocation(StoppedLocation);
-
-			bStopMovement = true;
-
-			return;*/
+			if (TraceHit.GetActor()->Tags.Contains("Piece") || TraceHit.GetActor() == this)
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Boop!.")); 
+				return;
+			}
+			if (TraceHit.GetActor()->Tags.Contains("Wall"))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Wall!.")); 
+				//return;
+			}
 		}
 	}
 
-	bStopMovement = false;
-	
-	FVector CurrentLocation = this->GetActorLocation();
-
 	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y - 1.f, CurrentLocation.Z);
+	
 	SetActorLocation(Move);
 }
 
@@ -264,44 +309,45 @@ void ATilePiece::MoveTileLeft(const FInputActionValue& Value)
 	InteractionInfo.CheckLastInteractionTime = GetWorld()->GetTimeSeconds();
 
 	FVector CurrentLocation = GetActorLocation();
-	
-	LineTraceStart = FVector(CurrentLocation.X, CurrentLocation.Y + 90.f, CurrentLocation.Z + 60.f);
 
 	FVector RightVector = GetActorRightVector();
 
 	FVector LeftVector = FVector(RightVector.X, -RightVector.Y, RightVector.Z);
-	
+
+	// Three line traces from each side to make
+	LineTraceStart = FVector(CurrentLocation.X, CurrentLocation.Y + 90.25f, CurrentLocation.Z + 60.f);
 	FVector LineTraceEnd{FVector(LineTraceStart.X, LineTraceStart.Y + CheckInteractionDistance, LineTraceStart.Z)};
+
+	
 	float LookDirection = FVector::DotProduct(LeftVector, LineTraceStart);
 
 	if (LookDirection > 0)
 	{
 		// Visualize our trace hit line
-		DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd , FColor::Magenta, false, 1.0f, 0, 1.f);
-
-		// Contains useful things for line tracing
+		//DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd , FColor::Magenta, false, 1.0f, 0, 1.f);
+		
 		FCollisionQueryParams QueryParams;
-
-		// I'm the class shooting out the line trace, don't want to hit myself
-		//QueryParams.AddIgnoredActor(this);
-
+		
 		QueryParams.ClearIgnoredActors();
 
 		// Store the result of the line trace, also contains the actor that was hit
 		FHitResult TraceHit;
 
-		if(GetWorld()->LineTraceSingleByChannel(TraceHit, LineTraceStart,  LineTraceEnd, ECC_Visibility, QueryParams))
+		FVector HalfSize = FVector(20.f, 0.25f, 25.f);
+
+		FRotator Orientation = FRotator(0.f, 0.f, 0.f);
+
+		if (UKismetSystemLibrary::BoxTraceSingle(GetWorld(), LineTraceStart, LineTraceEnd, HalfSize, Orientation, TraceTypeQuery1, false, Actors, EDrawDebugTrace::None, TraceHit, false, FColor::Magenta, FColor::Blue, 1.0f))
 		{
 			if (TraceHit.GetActor()->Tags.Contains("Piece") || TraceHit.GetActor() == this)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Boop!.")); 
+				//UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Boop!.")); 
 				return;
 			}
-			if (TraceHit.GetActor()->Tags.Contains("TileGame"))
+			if (TraceHit.GetActor()->Tags.Contains("Wall"))
 			{
-
-				//UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Game!.")); 
-				//return;
+				//UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Wall!.")); 
+				return;
 			}
 		}
 	}
@@ -309,35 +355,6 @@ void ATilePiece::MoveTileLeft(const FInputActionValue& Value)
 	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y + 1.f, CurrentLocation.Z);
 
 	SetActorLocation(Move);
-
-	
-/*	Actors.Empty();
-	
-	this->GetOverlappingActors(Actors);
-	
-	for (int i = 1; i < Actors.Num(); i++)
-	{
-		if (Actors[i]->GetClass() == this->GetClass())
-		{
-			FVector Location = this->GetActorLocation();
-
-			FVector StoppedLocation = FVector(Location.X, Location.Y - 1.f, Location.Z);
-
-			SetActorLocation(StoppedLocation);
-
-			bStopMovement = true;
-
-			return;
-		}
-	}
-
-	bStopMovement = false;
-
-	FVector CurrentLocation = this->GetActorLocation();
-
-	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y + 1.f, CurrentLocation.Z);
-	
-	SetActorLocation(Move);*/
 }
 
 //TODO: Learn more about overlay materials, make these translucent instead of opaque - they are completely hiding the tiles
