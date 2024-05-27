@@ -170,29 +170,50 @@ void ATilePiece::OnBecomeUnPossessed()
 //TODO: This needs to be edited to only move on the Z and Y axes
 void ATilePiece::MoveTileDown(const FInputActionValue& Value)
 {
-	Actors.Empty();
+	InteractionInfo.CheckLastInteractionTime = GetWorld()->GetTimeSeconds();
+
+	FVector CurrentLocation = GetActorLocation();
+
+	FVector UpVector = GetActorUpVector();
+
+	FVector DownVector = FVector(UpVector.X, UpVector.Y, -UpVector.Z);
+
+	// Three line traces from each side to make
+	LineTraceStart = FVector(CurrentLocation.X, CurrentLocation.Y + 60.f , CurrentLocation.Z + 36.5f);
+	FVector LineTraceEnd{FVector(LineTraceStart.X, LineTraceStart.Y + CheckInteractionDistance, LineTraceStart.Z)};
 	
-	this->GetOverlappingActors(Actors);
-	
-	for (int i = 1; i < Actors.Num(); i++)
+	float LookDirection = FVector::DotProduct(DownVector, LineTraceEnd);
+
+	if (LookDirection > 0)
 	{
-		if (Actors[i]->GetClass() == this->GetClass())
+		// Visualize our trace hit line
+		//DrawDebugLine(GetWorld(), LineTraceStart, LineTraceEnd , FColor::Magenta, false, 1.0f, 0, 1.f);
+		
+		FCollisionQueryParams QueryParams;
+		
+		QueryParams.ClearIgnoredActors();
+
+		// Store the result of the line trace, also contains the actor that was hit
+		FHitResult TraceHit;
+
+		FVector HalfSize = FVector(0.25f, 22.75f, 0.25f);
+
+		FRotator Orientation = FRotator(0.f, 0.f, 0.f);
+
+		if (UKismetSystemLibrary::BoxTraceSingle(GetWorld(), LineTraceStart, LineTraceEnd, HalfSize, Orientation, TraceTypeQuery1, false, Actors, EDrawDebugTrace::None, TraceHit, false, FColor::Magenta, FColor::Blue, 1.0f))
 		{
-			/*FVector Location = this->GetActorLocation();
-
-			FVector StoppedLocation = FVector(Location.X, Location.Y, Location.Z + 1.f);
-
-			SetActorLocation(StoppedLocation);
-
-			bStopMovement = true;
-			
-			return;*/
+			if (TraceHit.GetActor()->Tags.Contains("Piece") || TraceHit.GetActor() == this)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Boop!.")); 
+				return;
+			}
+			if (TraceHit.GetActor()->Tags.Contains("Wall"))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Wall!.")); 
+				return;
+			}
 		}
 	}
-
-	bStopMovement = false;
-	
-	FVector CurrentLocation = this->GetActorLocation();
 
 	const FVector Move = FVector(CurrentLocation.X, CurrentLocation.Y, CurrentLocation.Z - 1.f);
 	SetActorLocation(Move);
@@ -229,7 +250,7 @@ void ATilePiece::MoveTileUp(const FInputActionValue& Value)
 		// Store the result of the line trace, also contains the actor that was hit
 		FHitResult TraceHit;
 
-		FVector HalfSize = FVector(0.25f, 25.f, 0.25f);
+		FVector HalfSize = FVector(0.25f, 22.75f, 0.25f);
 
 		FRotator Orientation = FRotator(0.f, 0.f, 0.f);
 
@@ -243,7 +264,7 @@ void ATilePiece::MoveTileUp(const FInputActionValue& Value)
 			if (TraceHit.GetActor()->Tags.Contains("Wall"))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Wall!.")); 
-				//return;
+				return;
 			}
 		}
 	}
@@ -280,7 +301,7 @@ void ATilePiece::MoveTileRight(const FInputActionValue& Value)
 		// Store the result of the line trace, also contains the actor that was hit
 		FHitResult TraceHit;
 
-		FVector HalfSize = FVector(20.f, 0.25f, 25.f);
+		FVector HalfSize = FVector(20.f, 0.25f, 23.f);
 
 		FRotator Orientation = FRotator(0.f, 0.f, 0.f);
 
@@ -294,7 +315,7 @@ void ATilePiece::MoveTileRight(const FInputActionValue& Value)
 			if (TraceHit.GetActor()->Tags.Contains("Wall"))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("ATilePiece: Wall!.")); 
-				//return;
+				return;
 			}
 		}
 	}
@@ -333,7 +354,7 @@ void ATilePiece::MoveTileLeft(const FInputActionValue& Value)
 		// Store the result of the line trace, also contains the actor that was hit
 		FHitResult TraceHit;
 
-		FVector HalfSize = FVector(20.f, 0.25f, 25.f);
+		FVector HalfSize = FVector(20.f, 0.25f, 23.f);
 
 		FRotator Orientation = FRotator(0.f, 0.f, 0.f);
 
